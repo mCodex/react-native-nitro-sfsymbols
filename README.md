@@ -24,7 +24,7 @@
 <td>
 
 ### 🎯 Core
-- � Native SF Symbols on iOS 13+
+- 🍎 Native SF Symbols on iOS, macOS, tvOS, visionOS
 - 📦 Fully type-safe TypeScript
 - 🚀 Nitro Modules (zero-bridge overhead)
 - 📏 Minimal bundle size (~5KB)
@@ -69,6 +69,18 @@ yarn add react-native-nitro-sfsymbols react-native-nitro-modules
 ```bash
 cd ios && pod install
 ```
+
+### 🌍 Platform Support
+
+| Platform | Support | Minimum Version | Notes |
+|----------|---------|-----------------|-------|
+| 📱 iOS | ✅ Full | 13.0 | Complete SF Symbols support |
+| 🖥️ macOS | ✅ Full | 11.0 | Desktop SF Symbols support |
+| 📺 tvOS | ✅ Full | 13.0 | TV app SF Symbols support |
+| 👓 visionOS | ✅ Full | 1.0 | Spatial computing SF Symbols |
+| 🤖 Android | ⚠️ Stub | - | Framework ready, requires Material Icons alternative |
+
+---
 
 ### 💡 Basic Usage
 
@@ -422,23 +434,52 @@ This library is **optimized for performance**:
 
 ## 💻 Platform Support
 
-| Platform | Version | Status |
-|----------|---------|--------|
-| 🍎 iOS | 13+ | ✅ Full support |
-| 🤖 Android | All | ⚠️ Stubs only |
+| Platform | Minimum Version | Status | Notes |
+|----------|-----------------|--------|-------|
+| 🍎 iOS | 13.0 | ✅ Full | Complete SF Symbols support with all features |
+| 🖥️ macOS | 11.0 | ✅ Full | Desktop SF Symbols with native rendering |
+| 📺 tvOS | 13.0 | ✅ Full | TV app SF Symbols optimized for tvOS |
+| 👓 visionOS | 1.0 | ✅ Full | Spatial computing with SF Symbols |
+| 🤖 Android | All | ⚠️ Stubs | Framework ready, no native SF Symbols support |
 
 > [!WARNING]
-> **Android Note**: SF Symbols are exclusive to Apple's platforms. On Android, this library provides placeholder stubs to prevent crashes. Use [Material Design Icons](https://fonts.google.com/icons) instead.
+> **Android Note**: SF Symbols are exclusive to Apple's platforms (iOS, macOS, tvOS, visionOS). On Android, this library provides placeholder stubs to prevent crashes. Use [Material Design Icons](https://fonts.google.com/icons) instead.
 
 ---
 
 ## 🏗️ Platform-Specific Notes
 
-### 🍎 iOS
+### 📱 iOS (13.0+)
 
-- Full native support for iOS 13+
-- All features available
-- Optimal performance
+Full native support for all SF Symbols features:
+- ✅ All 400+ SF Symbols available
+- ✅ Weight, scale, and rendering modes
+- ✅ Color customization and hierarchical colors
+- ✅ Animations (iOS 17+)
+
+### 🖥️ macOS (11.0+)
+
+Complete desktop support for SF Symbols:
+- ✅ All iOS features available
+- ✅ Optimized for larger screens
+- ✅ Touch and trackpad interactions
+- ✅ Support for system appearances (light/dark)
+
+### 📺 tvOS (13.0+)
+
+Optimized for Apple TV:
+- ✅ All SF Symbols available
+- ✅ Focus-based navigation support
+- ✅ Larger default sizes (optimized for TV viewing)
+- ✅ Simplified interactions
+
+### 👓 visionOS (1.0+)
+
+Built for spatial computing:
+- ✅ All SF Symbols in 3D space
+- ✅ Native visionOS rendering
+- ✅ Gesture-based interactions
+- ✅ Immersive experiences (requires visionOS 1.0+)
 
 ### 🤖 Android
 

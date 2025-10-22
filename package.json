@@ -46,7 +46,13 @@
   "keywords": [
     "react-native",
     "ios",
-    "android"
+    "macos",
+    "tvos",
+    "visionos",
+    "android",
+    "sf-symbols",
+    "icons",
+    "nitro-modules"
   ],
   "repository": {
     "type": "git",

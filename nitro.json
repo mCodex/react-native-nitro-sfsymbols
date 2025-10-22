@@ -3,6 +3,15 @@
   "ios": {
     "iosModuleName": "NitroSfsymbols"
   },
+  "macos": {
+    "macosModuleName": "NitroSfsymbols"
+  },
+  "tvos": {
+    "tvosModuleName": "NitroSfsymbols"
+  },
+  "visionos": {
+    "visionosModuleName": "NitroSfsymbols"
+  },
   "android": {
     "androidNamespace": ["nitrosfsymbols"],
     "androidCxxLibName": "nitrosfsymbols"
