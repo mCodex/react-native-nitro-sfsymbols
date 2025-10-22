@@ -50,22 +50,22 @@ class HybridNitroSfsymbols(val context: ThemedReactContext) : HybridNitroSfsymbo
   override val view: View = createPlaceholderView()
 
   /// Placeholder for symbol name (not used on Android)
-  private var _name: String = ''
+  private var _name: String = ""
 
   /// Placeholder for symbol size (not used on Android)
   private var _size: Double = 24.0
 
   /// Placeholder for symbol weight (not used on Android)
-  private var _weight: String = 'regular'
+  private var _weight: String = "regular"
 
   /// Placeholder for symbol scale (not used on Android)
-  private var _scale: String = 'medium'
+  private var _scale: String = "medium"
 
   /// Placeholder for symbol tint color
-  private var _tintColor: String = '#000000'
+  private var _tintColor: String = "#000000"
 
   /// Placeholder for rendering mode (not used on Android)
-  private var _renderingMode: String = 'monochrome'
+  private var _renderingMode: String = "monochrome"
 
   /// Placeholder for hierarchical config (not used on Android)
   private var _hierarchicalConfig: Map<String, String>? = null
@@ -95,7 +95,7 @@ class HybridNitroSfsymbols(val context: ThemedReactContext) : HybridNitroSfsymbo
     get() = _name
     set(value) {
       _name = value
-      logWarning("Symbol name '$value' set on Android (SF Symbols not available)")
+      logWarning("Symbol name \"$value\" set on Android (SF Symbols not available)")
     }
 
   /**
@@ -115,7 +115,7 @@ class HybridNitroSfsymbols(val context: ThemedReactContext) : HybridNitroSfsymbo
     get() = _weight
     set(value) {
       _weight = value
-      logWarning("Symbol weight '$value' set on Android (SF Symbols not available)")
+      logWarning("Symbol weight \"$value\" set on Android (SF Symbols not available)")
     }
 
   /**
@@ -125,7 +125,7 @@ class HybridNitroSfsymbols(val context: ThemedReactContext) : HybridNitroSfsymbo
     get() = _scale
     set(value) {
       _scale = value
-      logWarning("Symbol scale '$value' set on Android (SF Symbols not available)")
+      logWarning("Symbol scale \"$value\" set on Android (SF Symbols not available)")
     }
 
   /**
@@ -145,7 +145,7 @@ class HybridNitroSfsymbols(val context: ThemedReactContext) : HybridNitroSfsymbo
     get() = _renderingMode
     set(value) {
       _renderingMode = value
-      logWarning("Rendering mode '$value' set on Android (SF Symbols not available)")
+      logWarning("Rendering mode \"$value\" set on Android (SF Symbols not available)")
     }
 
   /**

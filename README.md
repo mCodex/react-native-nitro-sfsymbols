@@ -9,6 +9,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 [![React Native](https://img.shields.io/badge/React%20Native-0.82-brightgreen.svg)](https://reactnative.dev/)
 [![Nitro Modules](https://img.shields.io/badge/Nitro%20Modules-0.31-purple.svg)](https://nitro.margelo.com/)
+[![Coverage: 100%](https://img.shields.io/badge/Coverage-100%25-brightgreen.svg)](./src/__tests__/)
 
 [📖 Documentation](#usage) • [🎯 Examples](#examples) • [🚀 Performance](#performance) • [📝 API Reference](#api-reference)
 

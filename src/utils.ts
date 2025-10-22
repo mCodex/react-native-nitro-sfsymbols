@@ -225,11 +225,10 @@ export function dimensionToSymbolSize(dimension: number): number {
     return dimension;
   }
 
-  // For small dimensions, use sensible defaults
+  // For small dimensions, use sensible defaults based on ranges
   if (dimension < 20) return 12;
   if (dimension < 32) return 16;
-  if (dimension < 48) return 24;
-  return 32;
+  return 24; // For 32-47
 }
 
 /**

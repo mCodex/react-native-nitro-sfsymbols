@@ -25,6 +25,10 @@ import {
   validateConfig,
   applyDefaults,
   getPresetSize,
+  optimizeProps,
+  createHierarchicalConfig,
+  createPaletteConfig,
+  dimensionToSymbolSize,
 } from '../utils';
 
 // MARK: - Icons Tests
@@ -212,6 +216,147 @@ describe('getPresetSize', () => {
     expect(getPresetSize('normal')).toBe(24);
     expect(getPresetSize('large')).toBe(32);
     expect(getPresetSize('xlarge')).toBe(48);
+  });
+});
+
+// MARK: - optimizeProps Tests
+
+describe('optimizeProps', () => {
+  it('should include only defined values', () => {
+    const props = {
+      name: 'heart.fill',
+      size: 24,
+      weight: SFSymbolWeight.BOLD,
+      tintColor: '#FF5722',
+    };
+    const optimized = optimizeProps(props as any);
+    expect(optimized).toEqual(props);
+  });
+
+  it('should exclude undefined values', () => {
+    const props = {
+      name: 'heart.fill',
+      size: undefined,
+      weight: undefined,
+    };
+    const optimized = optimizeProps(props as any);
+    expect(optimized).toEqual({ name: 'heart.fill' });
+  });
+
+  it('should handle all property types', () => {
+    const props = {
+      name: 'star.fill',
+      size: 32,
+      weight: SFSymbolWeight.SEMIBOLD,
+      scale: SFSymbolScale.LARGE,
+      tintColor: '#2196F3',
+      renderingMode: SFSymbolRenderingMode.HIERARCHICAL,
+      hierarchical: { primaryColor: '#FF5722' },
+      palette: { primaryColor: '#2196F3' },
+      animation: { type: 'bounce' },
+      opacity: 0.8,
+      variableColor: true,
+      reduceComplexity: false,
+      testID: 'test-symbol',
+      accessibilityLabel: 'Star',
+      accessibilityHint: 'Double tap to rate',
+    };
+    const optimized = optimizeProps(props as any);
+    expect(optimized).toEqual(props);
+  });
+});
+
+// MARK: - createHierarchicalConfig Tests
+
+describe('createHierarchicalConfig', () => {
+  it('should create config with provided colors', () => {
+    const config = createHierarchicalConfig({
+      primaryColor: '#FF5722',
+      secondaryColor: '#FF8A65',
+      tertiaryColor: '#FFAB91',
+    });
+    expect(config.primaryColor).toBe('#FF5722');
+    expect(config.secondaryColor).toBe('#FF8A65');
+    expect(config.tertiaryColor).toBe('#FFAB91');
+  });
+
+  it('should handle partial config', () => {
+    const config = createHierarchicalConfig({
+      primaryColor: '#FF5722',
+    });
+    expect(config.primaryColor).toBe('#FF5722');
+    expect(config.secondaryColor).toBeUndefined();
+  });
+
+  it('should handle empty config', () => {
+    const config = createHierarchicalConfig({});
+    expect(config.primaryColor).toBeUndefined();
+    expect(config.secondaryColor).toBeUndefined();
+    expect(config.tertiaryColor).toBeUndefined();
+  });
+});
+
+// MARK: - createPaletteConfig Tests
+
+describe('createPaletteConfig', () => {
+  it('should create config with all colors', () => {
+    const config = createPaletteConfig({
+      primaryColor: '#2196F3',
+      secondaryColor: '#4CAF50',
+      tertiaryColor: '#FFB300',
+    });
+    expect(config.primaryColor).toBe('#2196F3');
+    expect(config.secondaryColor).toBe('#4CAF50');
+    expect(config.tertiaryColor).toBe('#FFB300');
+  });
+
+  it('should throw when primary color is missing', () => {
+    expect(() => createPaletteConfig({})).toThrow(
+      'Palette configuration requires at least a primaryColor'
+    );
+  });
+
+  it('should allow partial secondary and tertiary colors', () => {
+    const config = createPaletteConfig({
+      primaryColor: '#2196F3',
+      secondaryColor: '#4CAF50',
+    });
+    expect(config.primaryColor).toBe('#2196F3');
+    expect(config.secondaryColor).toBe('#4CAF50');
+    expect(config.tertiaryColor).toBeUndefined();
+  });
+});
+
+// MARK: - dimensionToSymbolSize Tests
+
+describe('dimensionToSymbolSize', () => {
+  it('should use dimension directly if >= 48', () => {
+    expect(dimensionToSymbolSize(48)).toBe(48);
+    expect(dimensionToSymbolSize(64)).toBe(64);
+    expect(dimensionToSymbolSize(100)).toBe(100);
+  });
+
+  it('should return 12 for dimensions < 20', () => {
+    expect(dimensionToSymbolSize(10)).toBe(12);
+    expect(dimensionToSymbolSize(18)).toBe(12);
+    expect(dimensionToSymbolSize(1)).toBe(12);
+  });
+
+  it('should return 16 for dimensions 20-31', () => {
+    expect(dimensionToSymbolSize(20)).toBe(16);
+    expect(dimensionToSymbolSize(25)).toBe(16);
+    expect(dimensionToSymbolSize(31)).toBe(16);
+  });
+
+  it('should return 24 for dimensions 32-47', () => {
+    expect(dimensionToSymbolSize(32)).toBe(24);
+    expect(dimensionToSymbolSize(40)).toBe(24);
+    expect(dimensionToSymbolSize(47)).toBe(24);
+  });
+
+  it('should handle edge case at boundary 48', () => {
+    expect(dimensionToSymbolSize(48)).toBe(48);
+    expect(dimensionToSymbolSize(47.9)).toBe(24);
   });
 });
 

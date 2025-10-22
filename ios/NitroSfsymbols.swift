@@ -1,4 +1,5 @@
 import UIKit
+import NitroModules
 
 /**
  * HybridNitroSfsymbols - Native iOS Implementation
@@ -15,7 +16,7 @@ import UIKit
  *
  * @class HybridNitroSfsymbols
  */
-class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec {
+class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec_base, HybridNitroSfsymbolsSpec_protocol {
   // MARK: - Properties
 
   /// The main UIView containing the SF Symbol
@@ -167,7 +168,7 @@ class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec {
 
     // Create the base image
     guard let image = UIImage(systemName: name, withConfiguration: config) else {
-      print("⚠️  Warning: SF Symbol '\(name)' not found. Check symbol name at https://developer.apple.com/sf-symbols/")
+      print("⚠️  Warning: SF Symbol \"\(name)\" not found. Check symbol name at https://developer.apple.com/sf-symbols/")
       imageView.image = nil
       return
     }
@@ -327,7 +328,7 @@ class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec {
   private func hexStringToUIColor(hexColor: String) -> UIColor {
     let stringScanner = Scanner(string: hexColor)
 
-    if hexColor.hasPrefix('#') {
+    if hexColor.hasPrefix("#") {
       stringScanner.scanLocation = 1
     }
 
