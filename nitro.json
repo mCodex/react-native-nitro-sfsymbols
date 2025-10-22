@@ -1,0 +1,17 @@
+{
+  "cxxNamespace": ["nitrosfsymbols"],
+  "ios": {
+    "iosModuleName": "NitroSfsymbols"
+  },
+  "android": {
+    "androidNamespace": ["nitrosfsymbols"],
+    "androidCxxLibName": "nitrosfsymbols"
+  },
+  "autolinking": {
+    "NitroSfsymbols": {
+      "swift": "HybridNitroSfsymbols",
+      "kotlin": "HybridNitroSfsymbols"
+    }
+  },
+  "ignorePaths": ["node_modules"]
+}
