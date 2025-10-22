@@ -6,6 +6,7 @@ import android.widget.TextView
 import android.graphics.Color
 import com.facebook.proguard.annotations.DoNotStrip
 import com.facebook.react.uimanager.ThemedReactContext
+import com.margelo.nitro.core.Promise
 
 /**
  * HybridNitroSfsymbols - Android Stub Implementation
@@ -53,19 +54,19 @@ class HybridNitroSfsymbols(val context: ThemedReactContext) : HybridNitroSfsymbo
   private var _name: String = ""
 
   /// Placeholder for symbol size (not used on Android)
-  private var _size: Double = 24.0
+  private var _size: Double? = 24.0
 
   /// Placeholder for symbol weight (not used on Android)
-  private var _weight: String = "regular"
+  private var _weight: String? = "regular"
 
   /// Placeholder for symbol scale (not used on Android)
-  private var _scale: String = "medium"
+  private var _scale: String? = "medium"
 
   /// Placeholder for symbol tint color
-  private var _tintColor: String = "#000000"
+  private var _tintColor: String? = "#000000"
 
   /// Placeholder for rendering mode (not used on Android)
-  private var _renderingMode: String = "monochrome"
+  private var _renderingMode: String? = "monochrome"
 
   /// Placeholder for hierarchical config (not used on Android)
   private var _hierarchicalConfig: Map<String, String>? = null
@@ -74,16 +75,16 @@ class HybridNitroSfsymbols(val context: ThemedReactContext) : HybridNitroSfsymbo
   private var _paletteConfig: Map<String, String>? = null
 
   /// Placeholder for animation config (not used on Android)
-  private var _animationConfig: Map<String, Any>? = null
+  private var _animationConfig: Map<String, String>? = null
 
   /// Placeholder for opacity (not used on Android)
-  private var _opacity: Double = 1.0
+  private var _opacity: Double? = 1.0
 
   /// Placeholder for variable color flag (not used on Android)
-  private var _variableColor: Boolean = false
+  private var _variableColor: Boolean? = false
 
   /// Placeholder for reduce complexity flag (not used on Android)
-  private var _reduceComplexity: Boolean = false
+  private var _reduceComplexity: Boolean? = false
 
   // MARK: - Props
 
@@ -101,7 +102,7 @@ class HybridNitroSfsymbols(val context: ThemedReactContext) : HybridNitroSfsymbo
   /**
    * Symbol size property (stub - not functional on Android)
    */
-  override var size: Double
+  override var size: Double?
     get() = _size
     set(value) {
       _size = value
@@ -111,7 +112,7 @@ class HybridNitroSfsymbols(val context: ThemedReactContext) : HybridNitroSfsymbo
   /**
    * Symbol weight property (stub - not functional on Android)
    */
-  override var weight: String
+  override var weight: String?
     get() = _weight
     set(value) {
       _weight = value
@@ -121,7 +122,7 @@ class HybridNitroSfsymbols(val context: ThemedReactContext) : HybridNitroSfsymbo
   /**
    * Symbol scale property (stub - not functional on Android)
    */
-  override var scale: String
+  override var scale: String?
     get() = _scale
     set(value) {
       _scale = value
@@ -131,17 +132,19 @@ class HybridNitroSfsymbols(val context: ThemedReactContext) : HybridNitroSfsymbo
   /**
    * Tint color property (applied to placeholder background)
    */
-  override var tintColor: String
+  override var tintColor: String?
     get() = _tintColor
     set(value) {
       _tintColor = value
-      updatePlaceholderColor(value)
+      if (value != null) {
+        updatePlaceholderColor(value)
+      }
     }
 
   /**
    * Rendering mode property (stub - not functional on Android)
    */
-  override var renderingMode: String
+  override var renderingMode: String?
     get() = _renderingMode
     set(value) {
       _renderingMode = value
@@ -171,7 +174,7 @@ class HybridNitroSfsymbols(val context: ThemedReactContext) : HybridNitroSfsymbo
   /**
    * Animation config property (stub - not functional on Android)
    */
-  override var animationConfig: Map<String, Any>?
+  override var animationConfig: Map<String, String>?
     get() = _animationConfig
     set(value) {
       _animationConfig = value
@@ -181,7 +184,7 @@ class HybridNitroSfsymbols(val context: ThemedReactContext) : HybridNitroSfsymbo
   /**
    * Opacity property (stub - not functional on Android)
    */
-  override var opacity: Double
+  override var opacity: Double?
     get() = _opacity
     set(value) {
       _opacity = value
@@ -191,7 +194,7 @@ class HybridNitroSfsymbols(val context: ThemedReactContext) : HybridNitroSfsymbo
   /**
    * Variable color property (stub - not functional on Android)
    */
-  override var variableColor: Boolean
+  override var variableColor: Boolean?
     get() = _variableColor
     set(value) {
       _variableColor = value
@@ -201,7 +204,7 @@ class HybridNitroSfsymbols(val context: ThemedReactContext) : HybridNitroSfsymbo
   /**
    * Reduce complexity property (stub - not functional on Android)
    */
-  override var reduceComplexity: Boolean
+  override var reduceComplexity: Boolean?
     get() = _reduceComplexity
     set(value) {
       _reduceComplexity = value
@@ -214,16 +217,20 @@ class HybridNitroSfsymbols(val context: ThemedReactContext) : HybridNitroSfsymbo
    * Update symbol method (stub - not functional on Android)
    * This method is called when symbol configuration changes
    */
-  override suspend fun updateSymbol(config: Map<String, Any>) {
-    logWarning("updateSymbol() called on Android (SF Symbols not available)")
+  override fun updateSymbol(config: Map<String, String>): Promise<Unit> {
+    return Promise.async {
+      logWarning("updateSymbol() called on Android (SF Symbols not available)")
+    }
   }
 
   /**
    * Animate symbol method (stub - not functional on Android)
    * This method would animate the symbol on iOS
    */
-  override suspend fun animateSymbol(animationType: String) {
-    logWarning("animateSymbol() called on Android (SF Symbols not available)")
+  override fun animateSymbol(animationType: String): Promise<Unit> {
+    return Promise.async {
+      logWarning("animateSymbol() called on Android (SF Symbols not available)")
+    }
   }
 
   // MARK: - Private Helpers
