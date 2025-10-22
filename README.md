@@ -88,6 +88,18 @@ export function App() {
 
 ---
 
+## 🎬 Live Demo
+
+<div align="center">
+
+![Demo](./example.gif)
+
+*Interactive example showcasing color, weight, and scale customization with 400+ available SF Symbols*
+
+</div>
+
+---
+
 ## 📚 Usage
 
 ### 🎨 Simple Rendering
@@ -104,28 +116,71 @@ import { SFSymbolView, SFIcons } from 'react-native-nitro-sfsymbols';
 
 ### 📏 Available Symbols
 
-The library includes **100+ curated SF Symbol names**:
+The library includes **400+ curated SF Symbol names** organized into 23 categories:
 
 ```tsx
-// 🌦️ Weather
+// 🌦️ Weather (15 icons)
 SFIcons.THERMOMETER_SUN_FILL
-SFIcons.CLOUD_FILL
-SFIcons.WIND
+SFIcons.CLOUD_RAIN_FILL
+SFIcons.WIND_SNOW
 
-// 🎮 UI Controls
+// 🎮 UI Controls (25 icons)
 SFIcons.HEART_FILL
 SFIcons.STAR_FILL
-SFIcons.CHECKMARK
-SFIcons.XMARK
+SFIcons.CHECKMARK_CIRCLE_FILL
+SFIcons.XMARK_CIRCLE_FILL
 
-// 🧭 Navigation
+// 🧭 Navigation (30 icons)
 SFIcons.CHEVRON_LEFT
-SFIcons.ARROW_RIGHT
+SFIcons.ARROW_UP_RIGHT
+SFIcons.ARROW_CLOCKWISE
 SFIcons.LOCATION_FILL
+
+// 📁 Files (25 icons)
+SFIcons.FOLDER_FILL
+SFIcons.FILE_FILL
+SFIcons.TRASH_FILL
+
+// ... and 400+ more!
 ```
 
 > [!TIP]
-> Browse all 5000+ SF Symbols at [developer.apple.com/sf-symbols](https://developer.apple.com/sf-symbols/)
+> **Complete Icon List:** See [`src/icons.ts`](./src/icons.ts) for the full TypeScript enum with all **400+ available symbols** organized by category.
+
+## 🎯 Complete Iconography
+
+> [!IMPORTANT]
+> 📖 **Browse All 400+ Icons**: Open [`src/icons.ts`](./src/icons.ts) for the comprehensive, type-safe enum of all available SF Symbols organized into 23 categories:
+> 
+> - 🌦️ Weather (15 icons)
+> - 🧭 Navigation & Arrows (30 icons)  
+> - 🎮 UI Controls (25 icons)
+> - 📱 Media & Playback (20 icons)
+> - 📤 Share & Action (15 icons)
+> - 💬 Communication (20 icons)
+> - 🔍 Search & Settings (15 icons)
+> - 👤 User & Account (20 icons)
+> - 🔐 Security & Protection (15 icons)
+> - 📁 File & Document (25 icons)
+> - 🛒 Commerce & Shopping (20 icons)
+> - ❤️ Activity & Health (31 icons)
+> - 🔔 Notification & Alert (12 icons)
+> - 🗺️ Maps & Location (20 icons)
+> - ⏰ Time & Date (15 icons)
+> - 🔷 Shapes & Symbols (20 icons)
+> - 📐 Grid & Layout (12 icons)
+> - ✏️ Text & Editing (18 icons)
+> - 🖼️ Image & Media (15 icons)
+> - 🔊 Audio & Music (12 icons)
+> - 🔧 Utilities & Tools (20 icons)
+> - 🔢 Numbers & Symbols (10 icons)
+> - 🎛️ Additional UI Elements (15 icons)
+>
+> **👉 [View Complete List with All 400+ Icons →](./src/icons.ts)**
+
+---
+
+## 📚 Usage
 
 ### ⚖️ Weight Customization
 
