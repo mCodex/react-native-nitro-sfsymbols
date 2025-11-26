@@ -56,7 +56,7 @@ function normalizeSymbolProps(props: SFSymbolViewProps): NitroSfsymbolsProps {
   }
 
   return {
-    name: props.name,
+    symbolName: props.name,
     size: props.size,
     weight: props.weight ?? SFSymbolWeight.REGULAR,
     scale: props.scale ?? SFSymbolScale.MEDIUM,

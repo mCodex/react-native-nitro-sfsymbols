@@ -25,7 +25,7 @@ export interface NitroSfsymbolsProps extends HybridViewProps {
    * Name of the SF Symbol to render (e.g., "thermometer.sun.fill")
    * @see https://developer.apple.com/sf-symbols/
    */
-  name: string;
+  symbolName: string;
 
   /**
    * Size of the symbol in points. Default: 24

@@ -36,9 +36,9 @@ class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec_base, HybridNitroSfsymbolsS
    * @triggers updateSymbol() on change
    * @see https://developer.apple.com/sf-symbols/
    */
-  var name: String = "" {
+  var symbolName: String = "" {
     didSet {
-      guard name != oldValue else { return }
+      guard symbolName != oldValue else { return }
       updateSymbol()
     }
   }
@@ -267,7 +267,7 @@ class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec_base, HybridNitroSfsymbolsS
    * Update and render the symbol based on current configuration
    *
    * This is the main entry point for re-rendering. It handles:
-   * 1. Validation (name not empty)
+  * 1. Validation (symbolName not empty)
    * 2. Configuration building (size, weight, scale)
    * 3. Symbol creation from system library
    * 4. Rendering mode application (color, hierarchy, palette)
@@ -281,7 +281,7 @@ class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec_base, HybridNitroSfsymbolsS
    */
   private func updateSymbol() {
     guard let imageView = view as? UIImageView else { return }
-    guard !name.isEmpty else {
+    guard !symbolName.isEmpty else {
       imageView.image = nil
       return
     }
@@ -341,7 +341,7 @@ class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec_base, HybridNitroSfsymbolsS
       config = UIImage.SymbolConfiguration(pointSize: CGFloat(pointSize))
     }
 
-    return UIImage(systemName: name, withConfiguration: config)
+    return UIImage(systemName: symbolName, withConfiguration: config)
   }
 
   /**
@@ -575,8 +575,8 @@ class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec_base, HybridNitroSfsymbolsS
    */
   func updateSymbol(config: Dictionary<String, String>) throws -> Promise<Void> {
     return Promise.async {
-      if let name = config["name"] {
-        self.name = name
+      if let symbolName = config["symbolName"] {
+        self.symbolName = symbolName
       }
       if let size = config["size"], let sizeValue = Double(size) {
         self.size = sizeValue
