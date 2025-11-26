@@ -33,7 +33,7 @@ import type { SFSymbolViewProps } from './types';
 import { SFSymbolWeight, SFSymbolScale, SFSymbolRenderingMode } from './types';
 
 // Generate the native host component
-const NitroSfsymbolsConfig = require('../nitrogen/generated/shared/json/NitroSfsymbolsConfig.json');
+const NitroSfsymbolsConfig = require('./generated/NitroSfsymbolsConfig.json');
 
 const NitroSfsymbolsViewComponent = getHostComponent<
   NitroSfsymbolsProps,

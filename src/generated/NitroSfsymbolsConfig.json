@@ -1,0 +1,21 @@
+{
+  "uiViewClassName": "NitroSfsymbols",
+  "supportsRawText": false,
+  "bubblingEventTypes": {},
+  "directEventTypes": {},
+  "validAttributes": {
+    "symbolName": true,
+    "size": true,
+    "weight": true,
+    "scale": true,
+    "tintColor": true,
+    "renderingMode": true,
+    "hierarchicalConfig": true,
+    "paletteConfig": true,
+    "animationConfig": true,
+    "opacity": true,
+    "variableColor": true,
+    "reduceComplexity": true,
+    "hybridRef": true
+  }
+}

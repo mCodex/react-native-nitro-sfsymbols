@@ -40,7 +40,8 @@
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare": "bob build",
-    "nitrogen": "nitrogen",
+    "nitrogen:codegen": "nitrogen",
+    "nitrogen": "yarn nitrogen:codegen && node ./scripts/sync-nitro-config.cjs",
     "release": "release-it --only-version"
   },
   "keywords": [
@@ -125,13 +126,6 @@
     },
     "github": {
       "release": true
-    },
-    "plugins": {
-      "@release-it/conventional-changelog": {
-        "preset": {
-          "name": "angular"
-        }
-      }
     }
   },
   "prettier": {
