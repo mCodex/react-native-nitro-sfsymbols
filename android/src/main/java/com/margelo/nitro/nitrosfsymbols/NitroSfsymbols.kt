@@ -51,7 +51,7 @@ class HybridNitroSfsymbols(val context: ThemedReactContext) : HybridNitroSfsymbo
   override val view: View = createPlaceholderView()
 
   /// Placeholder for symbol name (not used on Android)
-  private var _name: String = ""
+  private var _symbolName: String = ""
 
   /// Placeholder for symbol size (not used on Android)
   private var _size: Double? = 24.0
@@ -92,10 +92,10 @@ class HybridNitroSfsymbols(val context: ThemedReactContext) : HybridNitroSfsymbo
    * Symbol name property (stub - not functional on Android)
    * For Android, use Material Design Icons or another cross-platform icon library
    */
-  override var name: String
-    get() = _name
+  override var symbolName: String
+    get() = _symbolName
     set(value) {
-      _name = value
+      _symbolName = value
       logWarning("Symbol name \"$value\" set on Android (SF Symbols not available)")
     }
 
