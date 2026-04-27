@@ -5,6 +5,7 @@
   "directEventTypes": {},
   "validAttributes": {
     "symbolName": true,
+    "fallbackName": true,
     "size": true,
     "weight": true,
     "scale": true,

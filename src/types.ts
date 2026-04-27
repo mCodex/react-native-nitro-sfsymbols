@@ -1,226 +1,254 @@
 /**
- * SF Symbols Rendering Configuration Types
+ * Public TypeScript types for `react-native-nitro-sfsymbols`.
  *
- * This module provides comprehensive TypeScript types, enums, and interfaces
- * for configuring SF Symbols rendering in React Native applications.
- * SF Symbols are only available on iOS 13+. Android usage will render a stub/placeholder.
+ * Constants are exported as `as const` objects (instead of `enum`) so they
+ * tree-shake cleanly and don't emit runtime helpers into the consuming bundle.
  *
  * @module types
  */
 
-/**
- * Represents the scale of an SF Symbol.
- * Different scales provide different visual weights for the symbol.
- *
- * @enum {string}
- * @see https://developer.apple.com/design/human-interface-guidelines/sf-symbols
- */
-export enum SFSymbolScale {
-  /** Small scale - suitable for compact layouts */
-  SMALL = 'small',
-  /** Medium scale - default and most commonly used */
-  MEDIUM = 'medium',
-  /** Large scale - for prominent displays */
-  LARGE = 'large',
-}
+import type { ColorValue, ViewProps, ViewStyle } from 'react-native';
+
+// ---------------------------------------------------------------------------
+// Constants (tree-shakable, zero runtime cost beyond the literal values)
+// ---------------------------------------------------------------------------
 
 /**
- * Represents the weight of an SF Symbol.
- * Weight affects the visual thickness of the symbol stroke.
+ * Stroke weight of the symbol. Mirrors `UIImage.SymbolWeight`.
  *
- * @enum {string}
- * @see https://developer.apple.com/design/human-interface-guidelines/sf-symbols
+ * @see https://developer.apple.com/documentation/uikit/uiimage/symbolweight
  */
-export enum SFSymbolWeight {
-  /** Ultralight weight - 100 */
-  ULTRALIGHT = 'ultralight',
-  /** Thin weight - 200 */
-  THIN = 'thin',
-  /** Light weight - 300 */
-  LIGHT = 'light',
-  /** Regular weight - 400 (default) */
-  REGULAR = 'regular',
-  /** Medium weight - 500 */
-  MEDIUM = 'medium',
-  /** Semibold weight - 600 */
-  SEMIBOLD = 'semibold',
-  /** Bold weight - 700 */
-  BOLD = 'bold',
-  /** Heavy weight - 800 */
-  HEAVY = 'heavy',
-  /** Black weight - 900 */
-  BLACK = 'black',
-}
+export const SFSymbolWeight = {
+  ULTRALIGHT: 'ultralight',
+  THIN: 'thin',
+  LIGHT: 'light',
+  REGULAR: 'regular',
+  MEDIUM: 'medium',
+  SEMIBOLD: 'semibold',
+  BOLD: 'bold',
+  HEAVY: 'heavy',
+  BLACK: 'black',
+} as const;
+export type SFSymbolWeight = (typeof SFSymbolWeight)[keyof typeof SFSymbolWeight];
 
 /**
- * Represents the rendering mode of an SF Symbol.
- * Different modes affect how the symbol is colored and rendered.
+ * Visual scale of the symbol. Mirrors `UIImage.SymbolScale`.
  *
- * @enum {string}
- * @see https://developer.apple.com/design/human-interface-guidelines/sf-symbols
+ * @see https://developer.apple.com/documentation/uikit/uiimage/symbolscale
  */
-export enum SFSymbolRenderingMode {
-  /** Monochrome - uses the tint color for the entire symbol */
-  MONOCHROME = 'monochrome',
-  /** Hierarchical - uses hierarchical coloring with opacity variations */
-  HIERARCHICAL = 'hierarchical',
-  /** Palette - uses multiple colors from a palette */
-  PALETTE = 'palette',
-  /** Multicolor - uses predefined colors (iOS 16+) */
-  MULTICOLOR = 'multicolor',
-}
+export const SFSymbolScale = {
+  SMALL: 'small',
+  MEDIUM: 'medium',
+  LARGE: 'large',
+} as const;
+export type SFSymbolScale = (typeof SFSymbolScale)[keyof typeof SFSymbolScale];
 
 /**
- * Represents the theme of SF Symbol rendering.
- * Themes control how symbols adapt to appearance changes.
+ * How colors are applied to the symbol's layers.
  *
- * @enum {string}
+ * - `monochrome` — single tint color (default; cheapest).
+ * - `hierarchical` — primary color with opacity-derived secondary/tertiary layers.
+ * - `palette` — distinct colors per layer.
+ * - `multicolor` — Apple's predefined per-symbol colors.
+ *
+ * @see https://developer.apple.com/documentation/uikit/uiimage/symbolconfiguration
  */
-export enum SFSymbolTheme {
-  /** Monochrome single color theme */
-  MONOCHROME = 'monochrome',
-  /** Two-color hierarchical theme */
-  HIERARCHICAL = 'hierarchical',
-  /** Multi-color palette theme */
-  PALETTE = 'palette',
-}
+export const SFSymbolRenderingMode = {
+  MONOCHROME: 'monochrome',
+  HIERARCHICAL: 'hierarchical',
+  PALETTE: 'palette',
+  MULTICOLOR: 'multicolor',
+} as const;
+export type SFSymbolRenderingMode =
+  (typeof SFSymbolRenderingMode)[keyof typeof SFSymbolRenderingMode];
 
 /**
- * Configuration for hierarchical coloring of SF Symbols.
- * Hierarchical mode uses primary and secondary colors with varying opacity.
+ * Animation effect to apply to the symbol (iOS 17+).
  *
- * @interface SFSymbolHierarchicalConfig
+ * @see https://developer.apple.com/documentation/symbols/symboleffect
+ */
+export const SFSymbolAnimationType = {
+  BOUNCE: 'bounce',
+  PULSE: 'pulse',
+  SCALE: 'scale',
+  ROTATE: 'rotate',
+  APPEAR: 'appear',
+  DISAPPEAR: 'disappear',
+  REPLACE: 'replace',
+  VARIABLE_COLOR: 'variableColor',
+} as const;
+export type SFSymbolAnimationType =
+  (typeof SFSymbolAnimationType)[keyof typeof SFSymbolAnimationType];
+
+// ---------------------------------------------------------------------------
+// Configuration shapes
+// ---------------------------------------------------------------------------
+
+/**
+ * Hierarchical color layers. Used when {@link SFSymbolRenderingMode.HIERARCHICAL}
+ * is set. Only `primary` is required; `secondary`/`tertiary` are derived from
+ * `primary` by the system when omitted.
  */
 export interface SFSymbolHierarchicalConfig {
-  /** Primary color for the hierarchy (typically 100% opacity) */
-  primaryColor?: string;
-  /** Secondary color for the hierarchy (typically 60% opacity) */
-  secondaryColor?: string;
-  /** Tertiary color for the hierarchy (typically 30% opacity) */
-  tertiaryColor?: string;
+  /** Hex color (`#RRGGBB`) for the primary (most opaque) layer. */
+  primary: string;
+  /** Optional override for the secondary layer. */
+  secondary?: string;
+  /** Optional override for the tertiary layer. */
+  tertiary?: string;
 }
 
 /**
- * Configuration for palette coloring of SF Symbols.
- * Palette mode allows specifying multiple distinct colors.
- *
- * @interface SFSymbolPaletteConfig
+ * Distinct colors per symbol layer. Used when {@link SFSymbolRenderingMode.PALETTE}
+ * is set.
  */
 export interface SFSymbolPaletteConfig {
-  /** Primary color for palette rendering */
-  primaryColor: string;
-  /** Secondary color for palette rendering */
-  secondaryColor?: string;
-  /** Tertiary color for palette rendering */
-  tertiaryColor?: string;
+  /** Hex color (`#RRGGBB`) for the primary layer. */
+  primary: string;
+  /** Hex color for the secondary layer. */
+  secondary?: string;
+  /** Hex color for the tertiary layer. */
+  tertiary?: string;
 }
 
 /**
- * Animation configuration for SF Symbols.
- * Note: Animation support depends on iOS version and symbol availability.
- *
- * @interface SFSymbolAnimationConfig
+ * Symbol animation configuration (iOS 17+). Animations are silently no-ops on
+ * older iOS versions and on devices with **Reduce Motion** enabled.
  */
 export interface SFSymbolAnimationConfig {
-  /** Whether to enable animations for the symbol */
-  enabled?: boolean;
-  /** Animation type to apply */
-  type?: SFSymbolAnimationType;
-  /** Whether to repeat the animation */
+  /** Animation type to apply. */
+  type: SFSymbolAnimationType;
+  /** Repeat the animation indefinitely. Default: `false`. */
   repeating?: boolean;
 }
 
-/**
- * Supported animation types for SF Symbols (iOS 17+).
- *
- * @enum {string}
- */
-export enum SFSymbolAnimationType {
-  /** No animation */
-  NONE = 'none',
-  /** Bounce animation */
-  BOUNCE = 'bounce',
-  /** Scale animation */
-  SCALE = 'scale',
-  /** Pulse animation */
-  PULSE = 'pulse',
-  /** Rotate animation */
-  ROTATE = 'rotate',
-  /** Appear animation */
-  APPEAR = 'appear',
-  /** Disappear animation */
-  DISAPPEAR = 'disappear',
-  /** Replace animation */
-  REPLACE = 'replace',
-}
+// ---------------------------------------------------------------------------
+// Public component props
+// ---------------------------------------------------------------------------
 
 /**
- * Comprehensive configuration for rendering an SF Symbol.
- * This interface provides type-safe access to all SF Symbol customization options.
+ * Branded string type for the curated SF Symbols catalog.
  *
- * @interface SFSymbolConfig
+ * Importing the catalog (`react-native-nitro-sfsymbols/icons`) widens the
+ * `name` prop to the curated names while still allowing any string.
+ */
+export type SFIconName = string;
+
+/**
+ * Props for `<SFSymbolView />`.
+ *
  * @example
- * ```ts
- * const config: SFSymbolConfig = {
- *   name: 'thermometer.sun.fill',
- *   size: 24,
- *   weight: SFSymbolWeight.SEMIBOLD,
- *   scale: SFSymbolScale.MEDIUM,
- *   tintColor: '#FF5722',
- * };
+ * ```tsx
+ * import { SFSymbolView } from 'react-native-nitro-sfsymbols';
+ *
+ * <SFSymbolView
+ *   name="heart.fill"
+ *   size={32}
+ *   tintColor="#FF3B30"
+ *   accessibilityLabel="Favorite"
+ * />
  * ```
  */
-export interface SFSymbolConfig {
-  /** Name of the SF Symbol to render (e.g., 'thermometer.sun.fill') */
-  name: string;
+export interface SFSymbolViewProps
+  extends Pick<
+    ViewProps,
+    | 'testID'
+    | 'accessibilityLabel'
+    | 'accessibilityHint'
+    | 'accessibilityRole'
+    | 'accessibilityLanguage'
+    | 'accessibilityElementsHidden'
+    | 'importantForAccessibility'
+  > {
+  /**
+   * SF Symbol name (e.g. `"heart.fill"`).
+   *
+   * Tip: import `SFIcons` from `react-native-nitro-sfsymbols/icons` to get
+   * autocomplete on the curated catalog while still allowing any string.
+   */
+  name: SFIconName;
 
-  /** Size of the symbol in points. Accepts any positive number. */
+  /**
+   * Symbol point size. Default: `24`. When {@link allowFontScaling} is
+   * enabled (the default), this value is scaled by the user's preferred
+   * Dynamic Type setting (WCAG 1.4.4).
+   */
   size?: number;
 
-  /** Weight of the symbol stroke */
+  /** Stroke weight. Default: `'regular'`. */
   weight?: SFSymbolWeight;
 
-  /** Scale variant of the symbol */
+  /** Visual scale. Default: `'medium'`. */
   scale?: SFSymbolScale;
 
-  /** Primary tint color for the symbol (hex color string) */
-  tintColor?: string;
+  /**
+   * Color used to tint the symbol. When omitted and the user has *Increase
+   * Contrast* enabled, the system label color is used for guaranteed contrast.
+   */
+  tintColor?: ColorValue;
 
-  /** Rendering mode for the symbol */
+  /** Color rendering mode. Default: `'monochrome'`. */
   renderingMode?: SFSymbolRenderingMode;
 
-  /** Hierarchical color configuration (used when renderingMode is HIERARCHICAL) */
+  /** Color layers for {@link SFSymbolRenderingMode.HIERARCHICAL}. */
   hierarchical?: SFSymbolHierarchicalConfig;
 
-  /** Palette color configuration (used when renderingMode is PALETTE) */
+  /** Color layers for {@link SFSymbolRenderingMode.PALETTE}. */
   palette?: SFSymbolPaletteConfig;
 
-  /** Animation configuration for the symbol */
+  /** iOS 17+ animation effect. */
   animation?: SFSymbolAnimationConfig;
 
-  /** Opacity of the symbol (0-1) */
+  /** Symbol opacity from `0` to `1`. Default: `1`. */
   opacity?: number;
 
-  /** Whether to enable variable color (iOS 16+) */
+  /** Enable variable-color rendering (iOS 16+). Default: `false`. */
   variableColor?: boolean;
 
-  /** Whether to reduce symbol complexity on lower-end devices */
-  reduceComplexity?: boolean;
+  /**
+   * Symbol to render if {@link name} cannot be resolved by iOS. Useful as a
+   * graceful fallback for symbols added in newer iOS versions.
+   */
+  fallbackName?: SFIconName;
+
+  /**
+   * Scale {@link size} with the user's preferred Dynamic Type setting (WCAG
+   * 1.4.4 Resize Text). Default: `true`.
+   */
+  allowFontScaling?: boolean;
+
+  /**
+   * Maximum Dynamic Type multiplier applied to {@link size}. Prevents extreme
+   * accessibility text sizes from breaking layouts. Default: `2`.
+   */
+  maxFontSizeMultiplier?: number;
+
+  /**
+   * When no {@link accessibilityLabel} is provided, derive a human-readable
+   * label from the symbol name (e.g. `"heart.fill"` → `"Heart"`). Default:
+   * `false` (icon is treated as decorative and hidden from assistive tech —
+   * see WCAG 1.1.1).
+   */
+  accessibilityAutoLabel?: boolean;
+
+  /** Optional view style overrides. */
+  style?: ViewStyle | ViewStyle[] | null;
 }
 
 /**
- * Props for the SFSymbolView component.
- * Extends standard React Native view props with SF Symbol specific configuration.
+ * Recommended minimum hit-target style for icon-only pressables (Apple HIG /
+ * WCAG 2.5.8). Spread onto the wrapping `Pressable`/`TouchableOpacity`:
  *
- * @interface SFSymbolViewProps
+ * @example
+ * ```tsx
+ * <Pressable style={minTouchTargetStyle} onPress={onTap}>
+ *   <SFSymbolView name="ellipsis" accessibilityLabel="More options" />
+ * </Pressable>
+ * ```
  */
-export interface SFSymbolViewProps extends SFSymbolConfig {
-  /** Test ID for testing purposes */
-  testID?: string;
-
-  /** Accessibility label for screen readers */
-  accessibilityLabel?: string;
-
-  /** Accessibility hint for screen readers */
-  accessibilityHint?: string;
-}
+export const minTouchTargetStyle = {
+  minWidth: 44,
+  minHeight: 44,
+  alignItems: 'center',
+  justifyContent: 'center',
+} as const satisfies ViewStyle;

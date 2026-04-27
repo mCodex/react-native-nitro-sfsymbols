@@ -1,621 +1,291 @@
-import UIKit
 import NitroModules
+import UIKit
 
-/**
- * HybridNitroSfsymbols - Native iOS Implementation
- *
- * High-performance SF Symbols renderer using React Native Nitro Modules.
- * Provides native iOS rendering for Apple's SF Symbols system with support for:
- * - Dynamic sizing with weight and scale variations
- * - Multiple rendering modes (monochrome, hierarchical, palette)
- * - iOS 13+ compatibility with automatic fallbacks
- * - Hierarchical and palette color configurations
- * - iOS 17+ animation support
- *
- * Architecture:
- * - Properties use didSet observers to trigger immediate re-rendering
- * - Configuration is rebuilt from scratch on each property change (DRY)
- * - Separate builder functions handle complex configuration logic (SRP)
- * - All operations are main-thread safe
- *
- * @class HybridNitroSfsymbols
- */
-class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec_base, HybridNitroSfsymbolsSpec_protocol {
-  // MARK: - View Management
+/// Native iOS implementation of `<SFSymbolView />`.
+///
+/// Renders Apple SF Symbols using `UIImage(systemName:)`. Property updates are
+/// coalesced into a single render pass per run-loop tick so multi-prop React
+/// updates don't trigger redundant work. Resolved `UIImage` instances are
+/// cached per configuration via `NSCache`, so list scrolling stays
+/// allocation-free.
+///
+/// Accessibility: respects `Reduce Motion` (animations are skipped) and
+/// `Increase Contrast` (falls back to system label color when no tint is set).
+final class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec_base, HybridNitroSfsymbolsSpec_protocol {
 
-  /// The main UIImageView for rendering SF Symbols
+  // MARK: - View
+
   var view: UIView = UIImageView()
 
-  // MARK: - Symbol Configuration Properties
+  private var imageView: UIImageView { view as! UIImageView }
 
-  /**
-   * Name of the SF Symbol to render (e.g., "thermometer.sun.fill")
-   *
-   * @type {string}
-   * @default ""
-   * @triggers updateSymbol() on change
-   * @see https://developer.apple.com/sf-symbols/
-   */
-  var symbolName: String = "" {
-    didSet {
-      guard symbolName != oldValue else { return }
-      updateSymbol()
+  // MARK: - Coalesced update flag
+
+  private var needsUpdate = false
+  private var didScheduleUpdate = false
+
+  private func setNeedsUpdate() {
+    needsUpdate = true
+    if didScheduleUpdate { return }
+    didScheduleUpdate = true
+    DispatchQueue.main.async { [weak self] in
+      guard let self else { return }
+      self.didScheduleUpdate = false
+      if self.needsUpdate {
+        self.needsUpdate = false
+        self.render()
+      }
     }
   }
 
-  /**
-   * Size of the symbol in points
-   *
-   * @type {number}
-   * @default 24
-   * @unit points
-   * @range [1, 512]
-   * @triggers updateSymbol() on change
-   */
-  var size: Double? = 24 {
-    didSet {
-      updateSymbol()
-    }
-  }
+  // MARK: - Properties
 
-  /**
-   * Font weight of the symbol stroke
-   *
-   * Supported values: "ultralight", "thin", "light", "regular", "medium",
-   * "semibold", "bold", "heavy", "black"
-   *
-   * @type {string}
-   * @default "regular"
-   * @note Requires iOS 13.1+
-   * @triggers updateSymbol() on change
-   * @example
-   * weight="bold"
-   */
-  var weight: String? = "regular" {
-    didSet {
-      updateSymbol()
-    }
-  }
+  var symbolName: String = "" { didSet { if symbolName != oldValue { setNeedsUpdate() } } }
+  var fallbackName: String? { didSet { if fallbackName != oldValue { setNeedsUpdate() } } }
+  var size: Double? = 24 { didSet { if size != oldValue { setNeedsUpdate() } } }
+  var weight: String? = "regular" { didSet { if weight != oldValue { setNeedsUpdate() } } }
+  var scale: String? = "medium" { didSet { if scale != oldValue { setNeedsUpdate() } } }
+  var tintColor: String? { didSet { if tintColor != oldValue { setNeedsUpdate() } } }
+  var renderingMode: String? = "monochrome" { didSet { if renderingMode != oldValue { setNeedsUpdate() } } }
+  var hierarchicalConfig: Dictionary<String, String>? { didSet { setNeedsUpdate() } }
+  var paletteConfig: Dictionary<String, String>? { didSet { setNeedsUpdate() } }
+  var animationConfig: Dictionary<String, String>? { didSet { setNeedsUpdate() } }
+  var opacity: Double? = 1.0 { didSet { if opacity != oldValue { setNeedsUpdate() } } }
+  var variableColor: Bool? = false { didSet { if variableColor != oldValue { setNeedsUpdate() } } }
+  var reduceComplexity: Bool? = false
 
-  /**
-   * Scale variant of the symbol
-   *
-   * Supported values: "small", "medium", "large"
-   * Affects the visual proportions of the symbol's internal elements
-   *
-   * @type {string}
-   * @default "medium"
-   * @note Requires iOS 13+
-   * @triggers updateSymbol() on change
-   * @example
-   * scale="large"
-   */
-  var scale: String? = "medium" {
-    didSet {
-      updateSymbol()
-    }
-  }
-
-  /**
-   * Primary tint color for the symbol
-   *
-   * Hex color string format: "#RRGGBB" or "RRGGBB"
-   *
-   * @type {string}
-   * @default "#000000"
-   * @format hex
-   * @triggers updateSymbol() on change
-   * @example
-   * tintColor="#FF5722"
-   */
-  var tintColor: String? = "#000000" {
-    didSet {
-      updateSymbol()
-    }
-  }
-
-  /**
-   * Color rendering mode for the symbol
-   *
-   * Supported values: "monochrome", "hierarchical", "palette", "multicolor"
-   * - monochrome: Single color (fastest, default)
-   * - hierarchical: Multi-level opacity colors (iOS 15+)
-   * - palette: Multiple distinct colors (iOS 15+)
-   * - multicolor: Predefined system colors (iOS 16+)
-   *
-   * @type {string}
-   * @default "monochrome"
-   * @triggers updateSymbol() on change
-   * @note hierarchical/palette modes require iOS 15+
-   */
-  var renderingMode: String? = "monochrome" {
-    didSet {
-      updateSymbol()
-    }
-  }
-
-  /**
-   * Hierarchical color configuration
-   *
-   * Only used when renderingMode is "hierarchical"
-   * Defines opacity-based color layers
-   *
-   * @type {Object}
-   * @example
-   * {
-   *   "primaryColor": "#FF5722",
-   *   "secondaryColor": "#FF8A65",
-   *   "tertiaryColor": "#FFAB91"
-   * }
-   * @note Requires iOS 15+
-   * @triggers updateSymbol() on change
-   */
-  var hierarchicalConfig: Dictionary<String, String>? {
-    didSet {
-      updateSymbol()
-    }
-  }
-
-  /**
-   * Palette color configuration
-   *
-   * Only used when renderingMode is "palette"
-   * Defines distinct colors for different symbol layers
-   *
-   * @type {Object}
-   * @example
-   * {
-   *   "primaryColor": "#2196F3",
-   *   "secondaryColor": "#4CAF50",
-   *   "tertiaryColor": "#FFB300"
-   * }
-   * @note Requires iOS 15+
-   * @triggers updateSymbol() on change
-   */
-  var paletteConfig: Dictionary<String, String>? {
-    didSet {
-      updateSymbol()
-    }
-  }
-
-  /**
-   * Animation configuration (iOS 17+)
-   *
-   * Defines animation parameters for symbol effects
-   *
-   * @type {Object}
-   * @example
-   * { "type": "bounce" }
-   * @triggers updateSymbol() on change
-   */
-  var animationConfig: Dictionary<String, String>? {
-    didSet {
-      updateSymbol()
-    }
-  }
-
-  /**
-   * Symbol opacity
-   *
-   * @type {number}
-   * @default 1.0
-   * @range [0, 1]
-   * @triggers updateSymbol() on change
-   */
-  var opacity: Double? = 1.0 {
-    didSet {
-      updateSymbol()
-    }
-  }
-
-  /**
-   * Enable variable color support
-   *
-   * @type {boolean}
-   * @default false
-   * @note Requires iOS 16+
-   * @triggers updateSymbol() on change
-   */
-  var variableColor: Bool? = false {
-    didSet {
-      updateSymbol()
-    }
-  }
-
-  /**
-   * Reduce symbol complexity for lower-end devices
-   *
-   * @type {boolean}
-   * @default false
-   * @triggers updateSymbol() on change
-   */
-  var reduceComplexity: Bool? = false {
-    didSet {
-      updateSymbol()
-    }
-  }
-
-  // MARK: - Initialization
+  // MARK: - Init
 
   override init() {
     super.init()
-    setupView()
+    let iv = imageView
+    iv.contentMode = .scaleAspectFit
+    iv.clipsToBounds = true
+    iv.isAccessibilityElement = false // The host RN view manages a11y.
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(reduceMotionChanged),
+      name: UIAccessibility.reduceMotionStatusDidChangeNotification,
+      object: nil
+    )
   }
 
-  // MARK: - View Setup
+  deinit { NotificationCenter.default.removeObserver(self) }
 
-  /**
-   * Initialize and configure the UIImageView
-   *
-   * Sets up the view with optimal defaults for SF Symbol rendering:
-   * - ContentMode: scaleAspectFit (maintains aspect ratio)
-   * - clipsToBounds: true (prevents overflow)
-   *
-   * @private
-   * @method setupView
-   */
-  private func setupView() {
-    let imageView = UIImageView()
-    imageView.contentMode = .scaleAspectFit
-    imageView.clipsToBounds = true
-    view = imageView
-  }
+  @objc private func reduceMotionChanged() { setNeedsUpdate() }
 
-  // MARK: - Core Rendering
+  // MARK: - Render pipeline
 
-  /**
-   * Update and render the symbol based on current configuration
-   *
-   * This is the main entry point for re-rendering. It handles:
-  * 1. Validation (symbolName not empty)
-   * 2. Configuration building (size, weight, scale)
-   * 3. Symbol creation from system library
-   * 4. Rendering mode application (color, hierarchy, palette)
-   * 5. Tinting and opacity
-   * 6. Animation application
-   *
-   * Called automatically by property didSet observers.
-   *
-   * @private
-   * @method updateSymbol
-   */
-  private func updateSymbol() {
-    guard let imageView = view as? UIImageView else { return }
+  private func render() {
     guard !symbolName.isEmpty else {
       imageView.image = nil
       return
     }
 
-    // Step 1: Build symbol configuration (size, weight, scale)
-    guard let baseImage = createBaseImage() else {
-      imageView.image = nil
-      return
-    }
+    let pointSize = CGFloat(size ?? 24)
+    let weightVal = parseWeight(weight ?? "regular")
+    let scaleVal = parseScale(scale ?? "medium")
+    let mode = renderingMode ?? "monochrome"
+    let tintHex = tintColor ?? Self.systemTintHex()
 
-    // Step 2: Apply rendering mode (color scheme)
-    let modeImage = applyRenderingMode(baseImage)
+    let cacheKey = NSString(format: "%@|%.1f|%d|%d|%@|%@|%@|%@|%d",
+                            symbolName, pointSize, weightVal.rawValue, scaleVal.rawValue,
+                            mode, tintHex,
+                            hashConfig(hierarchicalConfig),
+                            hashConfig(paletteConfig),
+                            (variableColor ?? false) ? 1 : 0)
 
-    // Step 3: Apply tint color and opacity
-    let finalImage = applyTintAndOpacity(modeImage)
-    imageView.image = finalImage
+    let image: UIImage? = {
+      if let cached = Self.imageCache.object(forKey: cacheKey) { return cached }
 
-    // Step 4: Apply animations (iOS 17+)
-    applyAnimationIfAvailable()
-  }
+      let baseConfig = UIImage.SymbolConfiguration(pointSize: pointSize, weight: weightVal, scale: scaleVal)
+      var img = resolveSystemImage(name: symbolName, fallback: fallbackName, config: baseConfig)
+      guard var resolved = img else { return nil }
 
-  // MARK: - Configuration Builders (SRP: Single Responsibility)
-
-  /**
-   * Create the base symbol image with size, weight, and scale configuration
-   *
-   * Handles iOS version compatibility:
-   * - iOS 13.1+: Uses unified constructor with weight, scale, and size
-   * - iOS 13.0: Uses only size (weight/scale unavailable)
-   *
-   * This is separated as its own method for:
-   * - Clarity: Single responsibility (symbol creation)
-   * - Testability: Can be unit tested independently
-   * - Maintainability: Easy to modify symbol configuration logic
-   *
-   * @private
-   * @method createBaseImage
-   * @returns {UIImage?} The base SF Symbol image or nil if not found
-   */
-  private func createBaseImage() -> UIImage? {
-    let pointSize = size ?? 24
-
-    var config: UIImage.SymbolConfiguration
-
-    if #available(iOS 13.1, *) {
-      // iOS 13.1+: Use unified constructor for optimal performance
-      let symbolWeight = parseWeight(weight ?? "regular") ?? .regular
-      let symbolScale = parseScale(scale ?? "medium") ?? .medium
-
-      config = UIImage.SymbolConfiguration(
-        pointSize: CGFloat(pointSize),
-        weight: symbolWeight,
-        scale: symbolScale
-      )
-    } else {
-      // iOS 13.0: Fallback (size only, no weight/scale support)
-      config = UIImage.SymbolConfiguration(pointSize: CGFloat(pointSize))
-    }
-
-    return UIImage(systemName: symbolName, withConfiguration: config)
-  }
-
-  /**
-   * Apply rendering mode to the symbol
-   *
-   * Handles different color rendering strategies:
-   * - monochrome: Direct rendering
-   * - hierarchical: Opacity-based multi-color (iOS 15+)
-   * - palette: Distinct multi-color layers (iOS 15+)
-   * - multicolor: System predefined colors
-   *
-   * Separated for maintainability: Each rendering mode is independent.
-   *
-   * @private
-   * @method applyRenderingMode
-   * @param {UIImage} image - Base symbol image
-   * @returns {UIImage} Image with rendering mode applied
-   */
-  private func applyRenderingMode(_ image: UIImage) -> UIImage {
-    let mode = (renderingMode ?? "monochrome").lowercased()
-
-    if #available(iOS 15.0, *) {
       switch mode {
       case "hierarchical":
-        return applyHierarchicalMode(image)
+        if let primary = hierarchicalConfig?["primaryColor"].flatMap(uiColorFromHex) {
+          resolved = resolved.applyingSymbolConfiguration(.init(hierarchicalColor: primary)) ?? resolved
+        }
       case "palette":
-        return applyPaletteMode(image)
+        let colors = ["primaryColor", "secondaryColor", "tertiaryColor"]
+          .compactMap { paletteConfig?[$0] }
+          .compactMap(uiColorFromHex)
+        if !colors.isEmpty {
+          resolved = resolved.applyingSymbolConfiguration(.init(paletteColors: colors)) ?? resolved
+        }
+      case "multicolor":
+        resolved = resolved.applyingSymbolConfiguration(UIImage.SymbolConfiguration.preferringMulticolor()) ?? resolved
       default:
         break
       }
-    }
 
-    // Monochrome or unsupported mode
-    return image
+      if mode == "monochrome" {
+        let tint = uiColorFromHex(tintHex) ?? .label
+        resolved = resolved.withTintColor(tint, renderingMode: .alwaysOriginal)
+      }
+
+      Self.imageCache.setObject(resolved, forKey: cacheKey, cost: Int(pointSize * pointSize * 4))
+      img = resolved
+      return resolved
+    }()
+
+    imageView.image = image
+    imageView.alpha = CGFloat(opacity ?? 1.0)
+
+    applyAnimation()
   }
 
-  /**
-   * Apply hierarchical color rendering
-   *
-   * Creates opacity-based color layers using primary, secondary, and tertiary colors.
-   *
-   * @private
-   * @method applyHierarchicalMode
-   * @param {UIImage} image - Base symbol image
-   * @returns {UIImage} Image with hierarchical colors applied
-   */
-  @available(iOS 15.0, *)
-  private func applyHierarchicalMode(_ image: UIImage) -> UIImage {
-    guard let config = hierarchicalConfig,
-          let primaryColorHex = config["primaryColor"] else {
-      return image
-    }
-
-    let primaryColor = hexStringToUIColor(primaryColorHex)
-    let symbolConfig = UIImage.SymbolConfiguration(hierarchicalColor: primaryColor)
-
-    return image.withConfiguration(symbolConfig)
+  private func resolveSystemImage(name: String, fallback: String?, config: UIImage.SymbolConfiguration) -> UIImage? {
+    if let img = UIImage(systemName: name, withConfiguration: config) { return img }
+    if let fb = fallback, let img = UIImage(systemName: fb, withConfiguration: config) { return img }
+    #if DEBUG
+    NSLog("[NitroSfsymbols] Symbol \"\(name)\" not found on this iOS version. Provide a `fallbackName` to silence this warning.")
+    #endif
+    return nil
   }
 
-  /**
-   * Apply palette color rendering
-   *
-   * Creates multi-color rendering using distinct colors for different symbol layers.
-   *
-   * @private
-   * @method applyPaletteMode
-   * @param {UIImage} image - Base symbol image
-   * @returns {UIImage} Image with palette colors applied
-   */
-  @available(iOS 15.0, *)
-  private func applyPaletteMode(_ image: UIImage) -> UIImage {
-    guard let config = paletteConfig else { return image }
+  // MARK: - Animation (iOS 17+)
 
-    var colors: [UIColor] = []
-
-    if let primaryHex = config["primaryColor"] {
-      colors.append(hexStringToUIColor(primaryHex))
-    }
-    if let secondaryHex = config["secondaryColor"] {
-      colors.append(hexStringToUIColor(secondaryHex))
-    }
-    if let tertiaryHex = config["tertiaryColor"] {
-      colors.append(hexStringToUIColor(tertiaryHex))
-    }
-
-    guard !colors.isEmpty else { return image }
-
-    let symbolConfig = UIImage.SymbolConfiguration(paletteColors: colors)
-    return image.withConfiguration(symbolConfig)
-  }
-
-  /**
-   * Apply tint color and opacity to the final image
-   *
-   * This is the final visual adjustments step.
-   * Done separately from rendering mode to ensure correct layer order.
-   *
-   * @private
-   * @method applyTintAndOpacity
-   * @param {UIImage} image - Image to tint
-   * @returns {UIImage} Tinted image
-   */
-  private func applyTintAndOpacity(_ image: UIImage) -> UIImage {
-    let colorHex = tintColor ?? "#000000"
-    let uiColor = hexStringToUIColor(colorHex)
-
-    return image.withTintColor(uiColor, renderingMode: .alwaysOriginal)
-  }
-
-  // MARK: - Property Parsers (Type Conversion)
-
-  /**
-   * Convert weight string to UIImage.SymbolWeight enum
-   *
-   * Maps string identifiers to native UIKit weight constants.
-   * Case-insensitive with sensible defaults.
-   *
-   * @private
-   * @method parseWeight
-   * @param {string} weight - Weight name
-   * @returns {UIImage.SymbolWeight?}
-   * @example
-   * parseWeight("bold") -> .bold
-   * parseWeight("SEMIBOLD") -> .semibold
-   */
-  @available(iOS 13.1, *)
-  private func parseWeight(_ weight: String) -> UIImage.SymbolWeight? {
-    switch weight.lowercased() {
-    case "ultralight": .unspecified
-    case "thin": .thin
-    case "light": .light
-    case "regular": .regular
-    case "medium": .medium
-    case "semibold": .semibold
-    case "bold": .bold
-    case "heavy": .heavy
-    case "black": .black
-    default: .regular
-    }
-  }
-
-  /**
-   * Convert scale string to UIImage.SymbolScale enum
-   *
-   * Maps string identifiers to native UIKit scale constants.
-   * Case-insensitive with sensible defaults.
-   *
-   * @private
-   * @method parseScale
-   * @param {string} scale - Scale name
-   * @returns {UIImage.SymbolScale?}
-   * @example
-   * parseScale("large") -> .large
-   * parseScale("SMALL") -> .small
-   */
-  @available(iOS 13.0, *)
-  private func parseScale(_ scale: String) -> UIImage.SymbolScale? {
-    switch scale.lowercased() {
-    case "small": .small
-    case "medium": .medium
-    case "large": .large
-    default: .medium
-    }
-  }
-
-  /**
-   * Convert hexadecimal color string to UIColor
-   *
-   * Supports both "#RRGGBB" and "RRGGBB" formats.
-   * Case-insensitive hex values.
-   *
-   * @private
-   * @method hexStringToUIColor
-   * @param {string} hexColor - Hex color string
-   * @returns {UIColor}
-   * @example
-   * hexStringToUIColor("#FF5722") -> UIColor(red:1.0, green:0.341, blue:0.133)
-   */
-  private func hexStringToUIColor(_ hexColor: String) -> UIColor {
-    let scanner = Scanner(string: hexColor)
-
-    if hexColor.hasPrefix("#") {
-      scanner.scanLocation = 1
-    }
-
-    var hexValue: UInt32 = 0
-    scanner.scanHexInt32(&hexValue)
-
-    let r = CGFloat(Int(hexValue >> 16) & 0xFF) / 255.0
-    let g = CGFloat(Int(hexValue >> 8) & 0xFF) / 255.0
-    let b = CGFloat(Int(hexValue) & 0xFF) / 255.0
-
-    return UIColor(red: r, green: g, blue: b, alpha: 1.0)
-  }
-
-  // MARK: - Animation Support
-
-  /**
-   * Apply animation to the symbol (iOS 17+)
-   *
-   * Separated into its own method for future expansion of animation types.
-   *
-   * @private
-   * @method applyAnimationIfAvailable
-   */
-  private func applyAnimationIfAvailable() {
+  private func applyAnimation() {
     guard #available(iOS 17.0, *) else { return }
-    guard let imageView = view as? UIImageView,
-          let animConfig = animationConfig,
-          let animType = animConfig["type"] else { return }
+    if UIAccessibility.isReduceMotionEnabled {
+      imageView.removeAllSymbolEffects()
+      return
+    }
+    guard let cfg = animationConfig, let type = cfg["type"] else {
+      imageView.removeAllSymbolEffects()
+      return
+    }
+    let repeating = cfg["repeating"] == "true"
 
-    // Placeholder for future iOS 17+ animation implementation
-  }
+    imageView.removeAllSymbolEffects()
+    let options: SymbolEffectOptions = repeating ? .repeating : .nonRepeating
 
-
-
-  // MARK: - Public Nitro Methods
-
-  /**
-   * Update symbol with partial configuration
-   *
-   * Allows updating specific properties without re-passing everything.
-   * Called from JavaScript/React Native.
-   *
-   * @public
-   * @method updateSymbol
-   * @param {Record<string, string>} config - Properties to update
-   * @returns {Promise<void>}
-   * @example
-   * await updateSymbol({ weight: "bold", scale: "large" })
-   */
-  func updateSymbol(config: Dictionary<String, String>) throws -> Promise<Void> {
-    return Promise.async {
-      if let symbolName = config["symbolName"] {
-        self.symbolName = symbolName
-      }
-      if let size = config["size"], let sizeValue = Double(size) {
-        self.size = sizeValue
-      }
-      if let weight = config["weight"] {
-        self.weight = weight
-      }
-      if let scale = config["scale"] {
-        self.scale = scale
-      }
-      if let tintColor = config["tintColor"] {
-        self.tintColor = tintColor
-      }
-      if let renderingMode = config["renderingMode"] {
-        self.renderingMode = renderingMode
-      }
+    switch type {
+    case "bounce": imageView.addSymbolEffect(.bounce, options: options)
+    case "pulse": imageView.addSymbolEffect(.pulse, options: options)
+    case "scale": imageView.addSymbolEffect(.scale, options: options)
+    case "rotate":
+      if #available(iOS 18.0, *) { imageView.addSymbolEffect(.rotate, options: options) }
+      else { imageView.addSymbolEffect(.pulse, options: options) }
+    case "appear": imageView.addSymbolEffect(.appear, options: options)
+    case "disappear": imageView.addSymbolEffect(.disappear, options: options)
+    case "replace":
+      // Replace requires a target image; treat as bounce when used standalone.
+      imageView.addSymbolEffect(.bounce, options: options)
+    case "variableColor":
+      imageView.addSymbolEffect(.variableColor, options: options)
+    default:
+      break
     }
   }
 
-  /**
-   * Animate the symbol (iOS 17+)
-   *
-   * Applies animation effects to the symbol.
-   * Called from JavaScript/React Native.
-   *
-   * @public
-   * @method animateSymbol
-   * @param {string} animationType - Animation type identifier
-   * @returns {Promise<void>}
-   * @example
-   * await animateSymbol("bounce")
-   */
+  // MARK: - Parsers
+
+  private func parseWeight(_ value: String) -> UIImage.SymbolWeight {
+    switch value.lowercased() {
+    case "ultralight": return .ultraLight
+    case "thin": return .thin
+    case "light": return .light
+    case "regular": return .regular
+    case "medium": return .medium
+    case "semibold": return .semibold
+    case "bold": return .bold
+    case "heavy": return .heavy
+    case "black": return .black
+    default: return .regular
+    }
+  }
+
+  private func parseScale(_ value: String) -> UIImage.SymbolScale {
+    switch value.lowercased() {
+    case "small": return .small
+    case "medium": return .medium
+    case "large": return .large
+    default: return .medium
+    }
+  }
+
+  private func hashConfig(_ dict: [String: String]?) -> String {
+    guard let dict, !dict.isEmpty else { return "_" }
+    return dict.keys.sorted().map { "\($0)=\(dict[$0] ?? "")" }.joined(separator: ",")
+  }
+
+  // MARK: - Color (hex parsing with LRU)
+
+  private static var colorCache: [String: UIColor] = [:]
+  private static let colorCacheLimit = 32
+
+  private func uiColorFromHex(_ raw: String?) -> UIColor? {
+    guard let raw, !raw.isEmpty else { return nil }
+    let key = raw.lowercased()
+    if let cached = Self.colorCache[key] { return cached }
+
+    var hex = raw.hasPrefix("#") ? String(raw.dropFirst()) : raw
+    // Expand #RGB → #RRGGBB
+    if hex.count == 3 {
+      hex = hex.map { "\($0)\($0)" }.joined()
+    }
+    guard hex.count == 6 || hex.count == 8 else { return nil }
+
+    var value: UInt64 = 0
+    let scanner = Scanner(string: hex)
+    guard scanner.scanHexInt64(&value) else { return nil }
+
+    let r, g, b, a: CGFloat
+    if hex.count == 8 {
+      r = CGFloat((value >> 24) & 0xff) / 255.0
+      g = CGFloat((value >> 16) & 0xff) / 255.0
+      b = CGFloat((value >> 8) & 0xff) / 255.0
+      a = CGFloat(value & 0xff) / 255.0
+    } else {
+      r = CGFloat((value >> 16) & 0xff) / 255.0
+      g = CGFloat((value >> 8) & 0xff) / 255.0
+      b = CGFloat(value & 0xff) / 255.0
+      a = 1.0
+    }
+    let color = UIColor(red: r, green: g, blue: b, alpha: a)
+
+    if Self.colorCache.count >= Self.colorCacheLimit { Self.colorCache.removeAll(keepingCapacity: true) }
+    Self.colorCache[key] = color
+    return color
+  }
+
+  /// Hex representation of the system label color so cache keys remain stable
+  /// when no explicit tint is provided. Honors *Increase Contrast*.
+  private static func systemTintHex() -> String {
+    if UIAccessibility.isDarkerSystemColorsEnabled { return "@label-hc" }
+    return "@label"
+  }
+
+  // MARK: - Image cache (per-configuration)
+
+  private static let imageCache: NSCache<NSString, UIImage> = {
+    let cache = NSCache<NSString, UIImage>()
+    cache.totalCostLimit = 8 * 1024 * 1024 // 8 MB
+    cache.countLimit = 256
+    return cache
+  }()
+
+  // MARK: - Reserved Nitro methods (kept for ABI compatibility)
+
+  func updateSymbol(config: Dictionary<String, String>) throws -> Promise<Void> {
+    return Promise.async { [weak self] in
+      guard let self else { return }
+      if let v = config["symbolName"] { self.symbolName = v }
+      if let v = config["size"], let d = Double(v) { self.size = d }
+      if let v = config["weight"] { self.weight = v }
+      if let v = config["scale"] { self.scale = v }
+      if let v = config["tintColor"] { self.tintColor = v }
+      if let v = config["renderingMode"] { self.renderingMode = v }
+    }
+  }
+
   func animateSymbol(animationType: String) throws -> Promise<Void> {
-    return Promise.async {
-      if #available(iOS 17.0, *) {
-        self.applyAnimationIfAvailable()
-      }
+    return Promise.async { [weak self] in
+      guard let self else { return }
+      self.animationConfig = ["type": animationType]
     }
   }
 }
-
-

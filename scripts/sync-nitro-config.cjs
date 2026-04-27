@@ -6,10 +6,7 @@ const source = path.resolve(
   __dirname,
   '../nitrogen/generated/shared/json/NitroSfsymbolsConfig.json'
 );
-const target = path.resolve(
-  __dirname,
-  '../src/generated/NitroSfsymbolsConfig.json'
-);
+const target = path.resolve(__dirname, '../src/generated/NitroSfsymbolsConfig.json');
 
 if (!fs.existsSync(source)) {
   console.error('[nitro] Unable to locate generated config at:', source);
