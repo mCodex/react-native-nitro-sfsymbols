@@ -7,7 +7,6 @@
 import { forwardRef, memo, useMemo } from 'react';
 import { type ColorValue, PixelRatio } from 'react-native';
 import { getHostComponent } from 'react-native-nitro-modules';
-import NitroSfsymbolsConfig from './generated/NitroSfsymbolsConfig.json';
 import type { NitroSfsymbolsMethods, NitroSfsymbolsProps } from './NitroSfsymbols.nitro';
 import type {
   SFSymbolAnimationConfig,
@@ -16,9 +15,36 @@ import type {
   SFSymbolViewProps,
 } from './types';
 
+/**
+ * Host component config consumed by `getHostComponent`. Inlined to avoid an
+ * extra build-time JSON sync step — the prop allowlist must match the Nitro
+ * spec above.
+ */
+const HOST_COMPONENT_CONFIG = {
+  uiViewClassName: 'NitroSfsymbols',
+  supportsRawText: false,
+  bubblingEventTypes: {},
+  directEventTypes: {},
+  validAttributes: {
+    symbolName: true,
+    fallbackName: true,
+    size: true,
+    weight: true,
+    scale: true,
+    tintColor: true,
+    renderingMode: true,
+    hierarchicalConfig: true,
+    paletteConfig: true,
+    animationConfig: true,
+    opacity: true,
+    variableColor: true,
+    hybridRef: true,
+  },
+} as const;
+
 const HostView = getHostComponent<NitroSfsymbolsProps, NitroSfsymbolsMethods>(
   'NitroSfsymbols',
-  () => NitroSfsymbolsConfig
+  () => HOST_COMPONENT_CONFIG
 );
 
 const DEFAULT_SIZE = 24;

@@ -39,23 +39,9 @@ export interface NitroSfsymbolsProps extends HybridViewProps {
   opacity?: number;
   /** Variable-color rendering (iOS 16+). */
   variableColor?: boolean;
-  /**
-   * @deprecated Reserved for future use. Currently a no-op.
-   */
-  reduceComplexity?: boolean;
 }
 
-/**
- * Imperative methods on the native view. Reserved for future use; not part of
- * the public API.
- *
- * @internal
- */
-export interface NitroSfsymbolsMethods extends HybridViewMethods {
-  /** @internal */
-  updateSymbol(config: Record<string, string>): Promise<void>;
-  /** @internal */
-  animateSymbol(animationType: string): Promise<void>;
-}
+/** No imperative methods are exposed on the native view. */
+export type NitroSfsymbolsMethods = HybridViewMethods;
 
 export type NitroSfsymbols = HybridView<NitroSfsymbolsProps, NitroSfsymbolsMethods>;

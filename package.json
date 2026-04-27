@@ -48,8 +48,7 @@
     "format": "biome format --write",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare": "bob build",
-    "nitrogen:codegen": "nitrogen",
-    "nitrogen": "yarn nitrogen:codegen && node ./scripts/sync-nitro-config.cjs",
+    "nitrogen": "nitrogen",
     "release": "release-it --only-version"
   },
   "keywords": [
@@ -84,6 +83,7 @@
     "@release-it/conventional-changelog": "^11.0.0",
     "@types/jest": "^30.0.0",
     "@types/react": "^19.2.14",
+    "babel-plugin-react-compiler": "^1.0.0",
     "commitlint": "^20.5.2",
     "del-cli": "^7.0.0",
     "jest": "^30.3.0",

@@ -3,7 +3,6 @@ package com.margelo.nitro.nitrosfsymbols
 import android.view.View
 import com.facebook.proguard.annotations.DoNotStrip
 import com.facebook.react.uimanager.ThemedReactContext
-import com.margelo.nitro.core.Promise
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -43,13 +42,6 @@ class HybridNitroSfsymbols(val context: ThemedReactContext) : HybridNitroSfsymbo
   override var animationConfig: Map<String, String>? = null
   override var opacity: Double? = null
   override var variableColor: Boolean? = null
-  override var reduceComplexity: Boolean? = null
-
-  override fun updateSymbol(config: Map<String, String>): Promise<Unit> =
-    Promise.async { /* no-op */ }
-
-  override fun animateSymbol(animationType: String): Promise<Unit> =
-    Promise.async { /* no-op */ }
 
   companion object {
     private val warned = AtomicBoolean(false)

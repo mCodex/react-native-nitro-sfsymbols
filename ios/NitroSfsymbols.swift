@@ -52,7 +52,6 @@ final class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec_base, HybridNitroSfsy
   var animationConfig: Dictionary<String, String>? { didSet { setNeedsUpdate() } }
   var opacity: Double? = 1.0 { didSet { if opacity != oldValue { setNeedsUpdate() } } }
   var variableColor: Bool? = false { didSet { if variableColor != oldValue { setNeedsUpdate() } } }
-  var reduceComplexity: Bool? = false
 
   // MARK: - Init
 
@@ -267,25 +266,4 @@ final class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec_base, HybridNitroSfsy
     cache.countLimit = 256
     return cache
   }()
-
-  // MARK: - Reserved Nitro methods (kept for ABI compatibility)
-
-  func updateSymbol(config: Dictionary<String, String>) throws -> Promise<Void> {
-    return Promise.async { [weak self] in
-      guard let self else { return }
-      if let v = config["symbolName"] { self.symbolName = v }
-      if let v = config["size"], let d = Double(v) { self.size = d }
-      if let v = config["weight"] { self.weight = v }
-      if let v = config["scale"] { self.scale = v }
-      if let v = config["tintColor"] { self.tintColor = v }
-      if let v = config["renderingMode"] { self.renderingMode = v }
-    }
-  }
-
-  func animateSymbol(animationType: String) throws -> Promise<Void> {
-    return Promise.async { [weak self] in
-      guard let self else { return }
-      self.animationConfig = ["type": animationType]
-    }
-  }
 }
