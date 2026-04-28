@@ -9,20 +9,9 @@
  */
 
 import { useState } from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
-} from 'react-native';
-import {
-  SFSymbolView,
-  SFIcons,
-  SFSymbolWeight,
-  SFSymbolScale,
-} from 'react-native-nitro-sfsymbols';
+import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SFSymbolScale, SFSymbolView, SFSymbolWeight } from 'react-native-nitro-sfsymbols';
+import { SFIcons } from 'react-native-nitro-sfsymbols/icons';
 
 // Icon categories with samples
 const ICON_CATEGORIES = [
@@ -99,7 +88,7 @@ const ICON_CATEGORIES = [
       { label: 'Map', name: SFIcons.MAP_FILL },
       { label: 'Compass', name: SFIcons.COMPASS_FILL },
       { label: 'North', name: SFIcons.LOCATION_NORTH_FILL },
-      { label: 'Globe', name: SFIcons.TOGGLE_POWER },
+      { label: 'Globe', name: SFIcons.LOCATION_CIRCLE_FILL },
       { label: 'Link', name: SFIcons.LINK_CIRCLE_FILL },
       { label: 'Safari', name: SFIcons.MAGNIFYINGGLASS_CIRCLE },
     ],
@@ -200,16 +189,10 @@ export default function App() {
               <TouchableOpacity
                 key={idx}
                 onPress={() => setSelectedWeight(idx)}
-                style={[
-                  styles.segment,
-                  selectedWeight === idx && styles.segmentActive,
-                ]}
+                style={[styles.segment, selectedWeight === idx && styles.segmentActive]}
               >
                 <Text
-                  style={[
-                    styles.segmentText,
-                    selectedWeight === idx && styles.segmentTextActive,
-                  ]}
+                  style={[styles.segmentText, selectedWeight === idx && styles.segmentTextActive]}
                 >
                   {weight === 'regular'
                     ? 'Regular'
@@ -228,16 +211,10 @@ export default function App() {
               <TouchableOpacity
                 key={idx}
                 onPress={() => setSelectedScale(idx)}
-                style={[
-                  styles.segment,
-                  selectedScale === idx && styles.segmentActive,
-                ]}
+                style={[styles.segment, selectedScale === idx && styles.segmentActive]}
               >
                 <Text
-                  style={[
-                    styles.segmentText,
-                    selectedScale === idx && styles.segmentTextActive,
-                  ]}
+                  style={[styles.segmentText, selectedScale === idx && styles.segmentTextActive]}
                 >
                   {scale.charAt(0).toUpperCase() + scale.slice(1)}
                 </Text>
@@ -274,12 +251,8 @@ export default function App() {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            Built with React Native Nitro 🚀
-          </Text>
-          <Text style={styles.footerSubtext}>
-            SF Symbols 7.0+ • Supports iOS 13+
-          </Text>
+          <Text style={styles.footerText}>Built with React Native Nitro 🚀</Text>
+          <Text style={styles.footerSubtext}>SF Symbols 7.0+ • Supports iOS 16+</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

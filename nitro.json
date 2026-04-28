@@ -18,8 +18,14 @@
   },
   "autolinking": {
     "NitroSfsymbols": {
-      "swift": "HybridNitroSfsymbols",
-      "kotlin": "HybridNitroSfsymbols"
+      "ios": {
+        "language": "swift",
+        "implementationClassName": "HybridNitroSfsymbols"
+      },
+      "android": {
+        "language": "kotlin",
+        "implementationClassName": "HybridNitroSfsymbols"
+      }
     }
   },
   "ignorePaths": ["node_modules"]

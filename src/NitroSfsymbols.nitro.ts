@@ -1,127 +1,45 @@
 /**
- * Nitro SF Symbols Native Module Definition
+ * Nitro view specification for `<SFSymbolView />`.
  *
- * This file defines the interface between React Native and native iOS/Android code
- * for rendering SF Symbols. It uses Nitro Modules for optimal performance and
- * seamless native integration.
+ * This file is consumed by Nitrogen at build time to generate the iOS / Android
+ * bridge code. Keep it minimal — every field becomes a native prop.
  *
  * @module NitroSfsymbols.nitro
  */
 
-import type {
-  HybridView,
-  HybridViewMethods,
-  HybridViewProps,
-} from 'react-native-nitro-modules';
+import type { HybridView, HybridViewMethods, HybridViewProps } from 'react-native-nitro-modules';
 
 /**
- * Native props for the SF Symbol view.
- * These props are passed to native code and control symbol rendering.
- *
- * @interface NitroSfsymbolsProps
+ * Native props for the SF Symbol view. These are the *wire* types — the
+ * public component (`SFSymbolView`) exposes a richer, friendlier surface
+ * around them.
  */
 export interface NitroSfsymbolsProps extends HybridViewProps {
-  /**
-   * Name of the SF Symbol to render (e.g., "thermometer.sun.fill")
-   * @see https://developer.apple.com/sf-symbols/
-   */
+  /** SF Symbol name, e.g. `"heart.fill"`. */
   symbolName: string;
-
-  /**
-   * Size of the symbol in points. Default: 24
-   */
+  /** Symbol to render if `symbolName` doesn't resolve. */
+  fallbackName?: string;
+  /** Effective point size after Dynamic Type scaling. */
   size?: number;
-
-  /**
-   * Weight (thickness) of the symbol stroke
-   * @default "regular"
-   */
+  /** Stroke weight string (mirrors `SFSymbolWeight`). */
   weight?: string;
-
-  /**
-   * Scale variant of the symbol
-   * @default "medium"
-   */
+  /** Visual scale string (mirrors `SFSymbolScale`). */
   scale?: string;
-
-  /**
-   * Primary tint color for the symbol (hex color string)
-   * @default "#000000"
-   */
+  /** Hex tint color (`#RRGGBB` or `#RRGGBBAA`). */
   tintColor?: string;
-
-  /**
-   * Rendering mode that determines how colors are applied
-   * @default "monochrome"
-   */
+  /** Rendering mode string (mirrors `SFSymbolRenderingMode`). */
   renderingMode?: string;
-
-  /**
-   * Hierarchical color configuration
-   * Used when renderingMode is "hierarchical"
-   */
+  /** `{ primaryColor, secondaryColor?, tertiaryColor? }` hex strings. */
   hierarchicalConfig?: Record<string, string>;
-
-  /**
-   * Palette color configuration
-   * Used when renderingMode is "palette"
-   */
+  /** `{ primaryColor, secondaryColor?, tertiaryColor? }` hex strings. */
   paletteConfig?: Record<string, string>;
-
-  /**
-   * Animation configuration for the symbol (iOS 17+)
-   */
+  /** `{ type, repeating? }` (`repeating` is `'true'` | `'false'`). */
   animationConfig?: Record<string, string>;
-
-  /**
-   * Opacity of the symbol (0-1)
-   * @default 1
-   */
+  /** `0`–`1`. */
   opacity?: number;
-
-  /**
-   * Enable variable color support (iOS 16+)
-   * @default false
-   */
-  variableColor?: boolean;
-
-  /**
-   * Reduce symbol complexity for lower-end devices
-   * @default false
-   */
-  reduceComplexity?: boolean;
 }
 
-/**
- * Methods available on the native SF Symbol view.
- *
- * @interface NitroSfsymbolsMethods
- */
-export interface NitroSfsymbolsMethods extends HybridViewMethods {
-  /**
-   * Update the SF Symbol with new configuration
-   * @param {Record<string, string>} config - Updated configuration
-   * @returns {Promise<void>}
-   */
-  updateSymbol(config: Record<string, string>): Promise<void>;
+/** No imperative methods are exposed on the native view. */
+export type NitroSfsymbolsMethods = HybridViewMethods;
 
-  /**
-   * Animate the SF Symbol (iOS 17+)
-   * @param {string} animationType - Type of animation to apply
-   * @returns {Promise<void>}
-   */
-  animateSymbol(animationType: string): Promise<void>;
-}
-
-/**
- * SF Symbol View Hybrid Object Type
- *
- * A HybridView that renders SF Symbols natively on iOS and provides
- * a stub on Android (since SF Symbols are iOS-exclusive).
- *
- * @type {HybridView<NitroSfsymbolsProps, NitroSfsymbolsMethods>}
- */
-export type NitroSfsymbols = HybridView<
-  NitroSfsymbolsProps,
-  NitroSfsymbolsMethods
->;
+export type NitroSfsymbols = HybridView<NitroSfsymbolsProps, NitroSfsymbolsMethods>;

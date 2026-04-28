@@ -1,14 +1,20 @@
 {
   "name": "react-native-nitro-sfsymbols",
   "version": "1.2.0",
-  "description": "..",
+  "description": "Render Apple SF Symbols natively in React Native via Nitro Modules. Type-safe, accessible, tree-shakable.",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
+  "sideEffects": false,
   "exports": {
     ".": {
-      "source": "./src/index.tsx",
       "types": "./lib/typescript/src/index.d.ts",
+      "source": "./src/index.tsx",
       "default": "./lib/module/index.js"
+    },
+    "./icons": {
+      "types": "./lib/typescript/src/icons.d.ts",
+      "source": "./src/icons.ts",
+      "default": "./lib/module/icons.js"
     },
     "./package.json": "./package.json"
   },
@@ -37,11 +43,12 @@
     "example": "yarn workspace react-native-nitro-sfsymbols-example",
     "test": "jest",
     "typecheck": "tsc",
-    "lint": "eslint \"**/*.{js,ts,tsx}\"",
+    "lint": "biome check",
+    "lint:fix": "biome check --write",
+    "format": "biome format --write",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare": "bob build",
-    "nitrogen:codegen": "nitrogen",
-    "nitrogen": "yarn nitrogen:codegen && node ./scripts/sync-nitro-config.cjs",
+    "nitrogen": "nitrogen",
     "release": "release-it --only-version"
   },
   "keywords": [
@@ -69,43 +76,47 @@
     "registry": "https://registry.npmjs.org/"
   },
   "devDependencies": {
-    "@commitlint/config-conventional": "^20.2.0",
-    "@eslint/compat": "^2.0.0",
-    "@eslint/eslintrc": "^3.3.3",
-    "@eslint/js": "^9.39.2",
-    "@evilmartians/lefthook": "^2.0.12",
-    "@react-native/babel-preset": "0.83.0",
-    "@react-native/eslint-config": "^0.83.0",
-    "@release-it/conventional-changelog": "^10.0.4",
+    "@biomejs/biome": "^2.4.13",
+    "@commitlint/config-conventional": "^20.5.0",
+    "@evilmartians/lefthook": "^2.1.6",
+    "@react-native/babel-preset": "0.85.2",
+    "@release-it/conventional-changelog": "^11.0.0",
     "@types/jest": "^30.0.0",
-    "@types/react": "^19.2.7",
-    "commitlint": "^20.2.0",
+    "@types/react": "^19.2.14",
+    "babel-plugin-react-compiler": "^1.0.0",
+    "commitlint": "^20.5.2",
     "del-cli": "^7.0.0",
-    "eslint": "^9.39.2",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.4",
-    "jest": "^30.2.0",
-    "nitrogen": "^0.31.10",
-    "prettier": "^3.7.4",
+    "jest": "^30.3.0",
+    "nitrogen": "^0.35.5",
     "react": "19.2.3",
-    "react-native": "0.83.0",
-    "react-native-builder-bob": "^0.40.17",
-    "react-native-nitro-modules": "^0.31.10",
-    "release-it": "^19.1.0",
-    "turbo": "^2.6.3",
-    "typescript": "^5.9.3"
+    "react-native": "0.85.2",
+    "react-native-builder-bob": "^0.41.0",
+    "react-native-nitro-modules": "^0.35.5",
+    "release-it": "^20.0.1",
+    "ts-jest": "^29.4.9",
+    "turbo": "^2.9.6",
+    "typescript": "^6.0.3"
   },
   "peerDependencies": {
     "react": "*",
     "react-native": "*",
-    "react-native-nitro-modules": "^0.31.10"
+    "react-native-nitro-modules": ">=0.35.0"
   },
   "workspaces": [
     "example"
   ],
   "packageManager": "yarn@3.6.1",
   "jest": {
-    "preset": "react-native",
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "transform": {
+      "^.+\\.tsx?$": [
+        "ts-jest",
+        {
+          "tsconfig": "tsconfig.test.json"
+        }
+      ]
+    },
     "modulePathIgnorePatterns": [
       "<rootDir>/example/node_modules",
       "<rootDir>/lib/"
@@ -127,13 +138,6 @@
     "github": {
       "release": true
     }
-  },
-  "prettier": {
-    "quoteProps": "consistent",
-    "singleQuote": true,
-    "tabWidth": 2,
-    "trailingComma": "es5",
-    "useTabs": false
   },
   "react-native-builder-bob": {
     "source": "src",
