@@ -252,7 +252,7 @@ export default function App() {
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>Built with React Native Nitro 🚀</Text>
-          <Text style={styles.footerSubtext}>SF Symbols 7.0+ • Supports iOS 13+</Text>
+          <Text style={styles.footerSubtext}>SF Symbols 7.0+ • Supports iOS 16+</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
