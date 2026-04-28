@@ -5,7 +5,7 @@
  */
 
 import { forwardRef, memo } from 'react';
-import { type ColorValue, useWindowDimensions } from 'react-native';
+import { useWindowDimensions } from 'react-native';
 import { getHostComponent } from 'react-native-nitro-modules';
 import type { NitroSfsymbolsMethods, NitroSfsymbolsProps } from './NitroSfsymbols.nitro';
 import type {
@@ -37,7 +37,6 @@ const HOST_COMPONENT_CONFIG = {
     paletteConfig: true,
     animationConfig: true,
     opacity: true,
-    variableColor: true,
     hybridRef: true,
   },
 } as const;
@@ -69,13 +68,6 @@ function toWireAnimation(
     type: config.type,
     repeating: config.repeating ? 'true' : 'false',
   };
-}
-
-function resolveColor(color: ColorValue | undefined): string | undefined {
-  if (color == null) return undefined;
-  if (typeof color === 'string') return color;
-  // OpaqueColorValue / number — let RN handle resolution downstream.
-  return undefined;
 }
 
 /**
@@ -141,7 +133,6 @@ export const SFSymbolView = memo(
         palette,
         animation,
         opacity,
-        variableColor,
         allowFontScaling = true,
         maxFontSizeMultiplier = DEFAULT_MAX_FONT_SCALE,
         accessibilityLabel,
@@ -194,13 +185,12 @@ export const SFSymbolView = memo(
           size={effectiveSize}
           weight={weight}
           scale={scale}
-          tintColor={resolveColor(tintColor)}
+          tintColor={tintColor}
           renderingMode={renderingMode}
           hierarchicalConfig={hierarchicalConfig}
           paletteConfig={paletteConfig}
           animationConfig={animationConfig}
           opacity={opacity}
-          variableColor={variableColor}
           testID={testID}
           accessible={hasLabel}
           accessibilityLabel={resolvedLabel}

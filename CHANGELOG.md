@@ -39,8 +39,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - **Breaking**: `SFSymbolTheme` (duplicate of `SFSymbolRenderingMode`).
+- **Breaking**: `variableColor` boolean prop. The variable-color symbol effect is now exposed exclusively through `animation={{ type: 'variableColor' }}` — the boolean version was a no-op.
 - **Breaking**: runtime helpers `isValidSFIcon`, `getAllSFIcons`, `camelCaseToSFSymbol`, `searchSFIcon`.
 - **Breaking**: utility module (`isValidColor`, `normalizeColor`, `clampOpacity`, `validateConfig`, `applyDefaults`, `optimizeProps`, `createHierarchicalConfig`, `createPaletteConfig`, `dimensionToSymbolSize`, `getPresetSize`).
+- **Breaking**: curated catalog entries that didn't map to real SF Symbols were removed; some keys were renamed (e.g. `TOGGLE_POWER` → `POWER`). Pass any symbol as a plain string if it isn't in the catalog.
 - `SF_SYMBOL_DEFAULTS` constant (defaults are documented per-prop).
 
 ### Fixed

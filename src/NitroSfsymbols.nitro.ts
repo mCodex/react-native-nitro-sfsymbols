@@ -25,20 +25,18 @@ export interface NitroSfsymbolsProps extends HybridViewProps {
   weight?: string;
   /** Visual scale string (mirrors `SFSymbolScale`). */
   scale?: string;
-  /** Hex tint color (`#RRGGBB`). */
+  /** Hex tint color (`#RRGGBB` or `#RRGGBBAA`). */
   tintColor?: string;
   /** Rendering mode string (mirrors `SFSymbolRenderingMode`). */
   renderingMode?: string;
-  /** `{ primary, secondary?, tertiary? }` hex colors. */
+  /** `{ primaryColor, secondaryColor?, tertiaryColor? }` hex strings. */
   hierarchicalConfig?: Record<string, string>;
-  /** `{ primary, secondary?, tertiary? }` hex colors. */
+  /** `{ primaryColor, secondaryColor?, tertiaryColor? }` hex strings. */
   paletteConfig?: Record<string, string>;
-  /** `{ type, repeating? }`. */
+  /** `{ type, repeating? }` (`repeating` is `'true'` | `'false'`). */
   animationConfig?: Record<string, string>;
   /** `0`–`1`. */
   opacity?: number;
-  /** Variable-color rendering (iOS 16+). */
-  variableColor?: boolean;
 }
 
 /** No imperative methods are exposed on the native view. */

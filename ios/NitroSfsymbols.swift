@@ -62,7 +62,6 @@ final class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec_base, HybridNitroSfsy
   var paletteConfig: Dictionary<String, String>? { didSet { setNeedsUpdate() } }
   var animationConfig: Dictionary<String, String>? { didSet { setNeedsUpdate() } }
   var opacity: Double? = 1.0 { didSet { if opacity != oldValue { setNeedsUpdate() } } }
-  var variableColor: Bool? = false { didSet { if variableColor != oldValue { setNeedsUpdate() } } }
 
   // MARK: - Init
 
@@ -101,17 +100,19 @@ final class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec_base, HybridNitroSfsy
     let weightVal = parseWeight(weight ?? "regular")
     let scaleVal = parseScale(scale ?? "medium")
     let mode = renderingMode ?? "monochrome"
-    let hasExplicitTint = (tintColor != nil)
-    let tintHex = tintColor ?? "@label"
+    // Validate the tint up front: an unparseable hex falls back to the system
+    // label color so we don't render a stale tint from a previous pass.
+    let resolvedTint: UIColor? = tintColor.flatMap(uiColorFromHex)
+    let hasExplicitTint = (resolvedTint != nil)
+    let tintHex = hasExplicitTint ? (tintColor ?? "") : "@label"
 
-    let cacheKey = NSString(format: "%@|%@|%.1f|%d|%d|%@|%@|%@|%@|%d|%d",
+    let cacheKey = NSString(format: "%@|%@|%.1f|%d|%d|%@|%@|%@|%@|%d",
                             symbolName, fallbackName ?? "_",
                             pointSize, weightVal.rawValue, scaleVal.rawValue,
                             mode, tintHex,
                             hashConfig(hierarchicalConfig),
                             hashConfig(paletteConfig),
-                            hasExplicitTint ? 1 : 0,
-                            (variableColor ?? false) ? 1 : 0)
+                            hasExplicitTint ? 1 : 0)
 
     // Short-circuit: nothing meaningful changed.
     if cacheKey == lastRenderKey {
@@ -145,10 +146,11 @@ final class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec_base, HybridNitroSfsy
         break
       }
 
-      // Only freeze the tint when the user supplied one explicitly. Otherwise
-      // we leave the image as `.alwaysTemplate` so that `imageView.tintColor`
-      // reacts dynamically to dark/light mode and Increase Contrast.
-      if mode == "monochrome", hasExplicitTint, let tint = uiColorFromHex(tintHex) {
+      // Only freeze the tint when the user supplied a parseable hex.
+      // Otherwise we leave the image as `.alwaysTemplate` so that
+      // `imageView.tintColor` reacts dynamically to dark/light mode and
+      // Increase Contrast.
+      if mode == "monochrome", let tint = resolvedTint {
         resolved = resolved.withTintColor(tint, renderingMode: .alwaysOriginal)
       }
 
@@ -293,12 +295,6 @@ final class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec_base, HybridNitroSfsy
     return color
   }
 
-  /// Hex representation of the system label color so cache keys remain stable
-  /// when no explicit tint is provided. Honors *Increase Contrast*.
-  private static func systemTintHex() -> String {
-    if UIAccessibility.isDarkerSystemColorsEnabled { return "@label-hc" }
-    return "@label"
-  }
   // MARK: - Image cache (per-configuration)
 
   private static let imageCache: NSCache<NSString, UIImage> = {

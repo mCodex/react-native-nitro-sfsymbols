@@ -41,7 +41,6 @@ class HybridNitroSfsymbols(val context: ThemedReactContext) : HybridNitroSfsymbo
   override var paletteConfig: Map<String, String>? = null
   override var animationConfig: Map<String, String>? = null
   override var opacity: Double? = null
-  override var variableColor: Boolean? = null
 
   companion object {
     private val warned = AtomicBoolean(false)

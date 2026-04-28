@@ -164,7 +164,10 @@ Standard `accessibilityLabel`, `accessibilityHint`, `accessibilityRole`,
    + hierarchical={{ primary: '#FF5722' }}
    ```
 6. **`SFSymbolTheme`** was a duplicate of `SFSymbolRenderingMode` — removed. Use `SFSymbolRenderingMode`.
-7. **iOS 16+ minimum**.
+7. **`tintColor` is now `string`** (hex). Pass `'#RRGGBB'`, `'#RGB'`, or `'#RRGGBBAA'`. Numeric/`processColor` values were silently dropped before — switching to a string keeps the type honest.
+8. **`variableColor` boolean prop removed**. Use `animation={{ type: 'variableColor' }}` instead, which is the actual iOS 17+ symbol effect.
+9. **The icon catalog is now curated**. Some 1.x entries were removed or renamed (e.g. `TOGGLE_POWER` → `POWER`). If TypeScript reports an unknown member, look up the symbol on Apple's [SF Symbols app](https://developer.apple.com/sf-symbols/) and pass its name as a plain string — every prop accepts arbitrary strings, so missing catalog entries are never blocking.
+10. **iOS 16+ minimum**.
 
 The full release notes live in [CHANGELOG.md](./CHANGELOG.md).
 

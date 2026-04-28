@@ -7,7 +7,7 @@
  * @module types
  */
 
-import type { ColorValue, ViewProps, ViewStyle } from 'react-native';
+import type { ViewProps, ViewStyle } from 'react-native';
 
 // ---------------------------------------------------------------------------
 // Constants (tree-shakable, zero runtime cost beyond the literal values)
@@ -127,10 +127,16 @@ export interface SFSymbolAnimationConfig {
 // ---------------------------------------------------------------------------
 
 /**
- * Branded string type for the curated SF Symbols catalog.
+ * Name of an SF Symbol (e.g. `"heart.fill"`).
  *
- * Importing the catalog (`react-native-nitro-sfsymbols/icons`) widens the
- * `name` prop to the curated names while still allowing any string.
+ * Any string is accepted. For autocomplete on the most commonly used symbols,
+ * import the curated catalog from the `/icons` subpath:
+ *
+ * ```ts
+ * import { SFIcons } from 'react-native-nitro-sfsymbols/icons';
+ *
+ * <SFSymbolView name={SFIcons.HEART_FILL} />;
+ * ```
  */
 export type SFIconName = string;
 
@@ -182,10 +188,12 @@ export interface SFSymbolViewProps
   scale?: SFSymbolScale;
 
   /**
-   * Color used to tint the symbol. When omitted and the user has *Increase
-   * Contrast* enabled, the system label color is used for guaranteed contrast.
+   * Hex color string (`#RGB`, `#RRGGBB`, or `#RRGGBBAA`) used to tint the
+   * symbol when {@link renderingMode} is `'monochrome'`. When omitted, the
+   * system label color is used — which automatically tracks dark/light mode
+   * and the user's *Increase Contrast* setting.
    */
-  tintColor?: ColorValue;
+  tintColor?: string;
 
   /** Color rendering mode. Default: `'monochrome'`. */
   renderingMode?: SFSymbolRenderingMode;
@@ -201,9 +209,6 @@ export interface SFSymbolViewProps
 
   /** Symbol opacity from `0` to `1`. Default: `1`. */
   opacity?: number;
-
-  /** Enable variable-color rendering (iOS 16+). Default: `false`. */
-  variableColor?: boolean;
 
   /**
    * Symbol to render if {@link name} cannot be resolved by iOS. Useful as a
