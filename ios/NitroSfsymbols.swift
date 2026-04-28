@@ -24,6 +24,17 @@ final class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec_base, HybridNitroSfsy
   private var needsUpdate = false
   private var didScheduleUpdate = false
 
+  /// Cache key of the currently-rendered image. Used to short-circuit
+  /// `render()` when no inputs that affect the image have changed.
+  private var lastRenderKey: NSString?
+
+  /// Cache key of the currently-applied symbol effect. Avoids restarting
+  /// iOS 17+ symbol effects on unrelated prop changes.
+  private var lastAnimationKey: String?
+
+  /// Last-applied alpha. Avoids redundant CALayer commits on every render.
+  private var lastOpacity: CGFloat = 1.0
+
   private func setNeedsUpdate() {
     needsUpdate = true
     if didScheduleUpdate { return }
@@ -71,13 +82,18 @@ final class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec_base, HybridNitroSfsy
 
   deinit { NotificationCenter.default.removeObserver(self) }
 
-  @objc private func reduceMotionChanged() { setNeedsUpdate() }
+  @objc private func reduceMotionChanged() {
+    // Force re-evaluation of the animation state on the next pass.
+    lastAnimationKey = "__invalidated__"
+    setNeedsUpdate()
+  }
 
   // MARK: - Render pipeline
 
   private func render() {
     guard !symbolName.isEmpty else {
       imageView.image = nil
+      lastRenderKey = nil
       return
     }
 
@@ -85,20 +101,30 @@ final class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec_base, HybridNitroSfsy
     let weightVal = parseWeight(weight ?? "regular")
     let scaleVal = parseScale(scale ?? "medium")
     let mode = renderingMode ?? "monochrome"
-    let tintHex = tintColor ?? Self.systemTintHex()
+    let hasExplicitTint = (tintColor != nil)
+    let tintHex = tintColor ?? "@label"
 
-    let cacheKey = NSString(format: "%@|%.1f|%d|%d|%@|%@|%@|%@|%d",
-                            symbolName, pointSize, weightVal.rawValue, scaleVal.rawValue,
+    let cacheKey = NSString(format: "%@|%@|%.1f|%d|%d|%@|%@|%@|%@|%d|%d",
+                            symbolName, fallbackName ?? "_",
+                            pointSize, weightVal.rawValue, scaleVal.rawValue,
                             mode, tintHex,
                             hashConfig(hierarchicalConfig),
                             hashConfig(paletteConfig),
+                            hasExplicitTint ? 1 : 0,
                             (variableColor ?? false) ? 1 : 0)
+
+    // Short-circuit: nothing meaningful changed.
+    if cacheKey == lastRenderKey {
+      applyOpacityIfChanged()
+      applyAnimation()
+      return
+    }
 
     let image: UIImage? = {
       if let cached = Self.imageCache.object(forKey: cacheKey) { return cached }
 
       let baseConfig = UIImage.SymbolConfiguration(pointSize: pointSize, weight: weightVal, scale: scaleVal)
-      var img = resolveSystemImage(name: symbolName, fallback: fallbackName, config: baseConfig)
+      let img = resolveSystemImage(name: symbolName, fallback: fallbackName, config: baseConfig)
       guard var resolved = img else { return nil }
 
       switch mode {
@@ -119,20 +145,33 @@ final class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec_base, HybridNitroSfsy
         break
       }
 
-      if mode == "monochrome" {
-        let tint = uiColorFromHex(tintHex) ?? .label
+      // Only freeze the tint when the user supplied one explicitly. Otherwise
+      // we leave the image as `.alwaysTemplate` so that `imageView.tintColor`
+      // reacts dynamically to dark/light mode and Increase Contrast.
+      if mode == "monochrome", hasExplicitTint, let tint = uiColorFromHex(tintHex) {
         resolved = resolved.withTintColor(tint, renderingMode: .alwaysOriginal)
       }
 
       Self.imageCache.setObject(resolved, forKey: cacheKey, cost: Int(pointSize * pointSize * 4))
-      img = resolved
       return resolved
     }()
 
     imageView.image = image
-    imageView.alpha = CGFloat(opacity ?? 1.0)
+    if mode == "monochrome", !hasExplicitTint {
+      imageView.tintColor = .label
+    }
+    lastRenderKey = cacheKey
 
+    applyOpacityIfChanged()
     applyAnimation()
+  }
+
+  private func applyOpacityIfChanged() {
+    let next = CGFloat(opacity ?? 1.0)
+    if next != lastOpacity {
+      lastOpacity = next
+      imageView.alpha = next
+    }
   }
 
   private func resolveSystemImage(name: String, fallback: String?, config: UIImage.SymbolConfiguration) -> UIImage? {
@@ -148,18 +187,20 @@ final class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec_base, HybridNitroSfsy
 
   private func applyAnimation() {
     guard #available(iOS 17.0, *) else { return }
-    if UIAccessibility.isReduceMotionEnabled {
-      imageView.removeAllSymbolEffects()
-      return
-    }
-    guard let cfg = animationConfig, let type = cfg["type"] else {
-      imageView.removeAllSymbolEffects()
-      return
-    }
-    let repeating = cfg["repeating"] == "true"
+
+    // Build a stable key for the desired animation state.
+    let desiredKey: String? = {
+      if UIAccessibility.isReduceMotionEnabled { return nil }
+      guard let cfg = animationConfig, let type = cfg["type"] else { return nil }
+      return "\(type)|\(cfg["repeating"] ?? "false")"
+    }()
+
+    if desiredKey == lastAnimationKey { return }
+    lastAnimationKey = desiredKey
 
     imageView.removeAllSymbolEffects()
-    let options: SymbolEffectOptions = repeating ? .repeating : .nonRepeating
+    guard let cfg = animationConfig, let type = cfg["type"], desiredKey != nil else { return }
+    let options: SymbolEffectOptions = (cfg["repeating"] == "true") ? .repeating : .nonRepeating
 
     switch type {
     case "bounce": imageView.addSymbolEffect(.bounce, options: options)
@@ -180,10 +221,11 @@ final class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec_base, HybridNitroSfsy
     }
   }
 
-  // MARK: - Parsers
+  // MARK: - Parsers (JS layer guarantees lowercase string-literal unions, so
+  // we skip the `lowercased()` allocation on the hot path.)
 
   private func parseWeight(_ value: String) -> UIImage.SymbolWeight {
-    switch value.lowercased() {
+    switch value {
     case "ultralight": return .ultraLight
     case "thin": return .thin
     case "light": return .light
@@ -198,7 +240,7 @@ final class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec_base, HybridNitroSfsy
   }
 
   private func parseScale(_ value: String) -> UIImage.SymbolScale {
-    switch value.lowercased() {
+    switch value {
     case "small": return .small
     case "medium": return .medium
     case "large": return .large
@@ -257,7 +299,6 @@ final class HybridNitroSfsymbols: HybridNitroSfsymbolsSpec_base, HybridNitroSfsy
     if UIAccessibility.isDarkerSystemColorsEnabled { return "@label-hc" }
     return "@label"
   }
-
   // MARK: - Image cache (per-configuration)
 
   private static let imageCache: NSCache<NSString, UIImage> = {

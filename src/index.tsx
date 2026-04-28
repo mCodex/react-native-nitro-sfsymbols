@@ -4,8 +4,8 @@
  * @packageDocumentation
  */
 
-import { forwardRef, memo, useMemo } from 'react';
-import { type ColorValue, PixelRatio } from 'react-native';
+import { forwardRef, memo } from 'react';
+import { type ColorValue, useWindowDimensions } from 'react-native';
 import { getHostComponent } from 'react-native-nitro-modules';
 import type { NitroSfsymbolsMethods, NitroSfsymbolsProps } from './NitroSfsymbols.nitro';
 import type {
@@ -155,35 +155,36 @@ export const SFSymbolView = memo(
         style,
       } = props;
 
-      if (__DEV__ && (typeof name !== 'string' || name.length === 0)) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          '[react-native-nitro-sfsymbols] `name` is required and must be a non-empty string.'
-        );
+      // Dynamic Type: scale `size` with the user's preferred text size,
+      // capped at `maxFontSizeMultiplier` (WCAG 1.4.4). Using
+      // `useWindowDimensions().fontScale` makes the icon resize live when the
+      // user changes Dynamic Type at runtime.
+      const fontScale = useWindowDimensions().fontScale;
+
+      if (typeof name !== 'string' || name.length === 0) {
+        if (__DEV__) {
+          console.warn(
+            '[react-native-nitro-sfsymbols] `name` is required and must be a non-empty string.'
+          );
+        }
+        return null;
       }
 
-      // Dynamic Type: scale `size` with the user's preferred text size,
-      // capped at `maxFontSizeMultiplier` (WCAG 1.4.4).
-      const effectiveSize = useMemo(() => {
-        if (!allowFontScaling) return size;
-        const scaleFactor = Math.min(PixelRatio.getFontScale(), maxFontSizeMultiplier);
-        return size * scaleFactor;
-      }, [size, allowFontScaling, maxFontSizeMultiplier]);
+      const effectiveSize = allowFontScaling
+        ? size * Math.min(fontScale, maxFontSizeMultiplier)
+        : size;
 
-      // Wire-format conversions are memoized on stable inputs only.
-      const hierarchicalConfig = useMemo(() => toWireColors(hierarchical), [hierarchical]);
-      const paletteConfig = useMemo(() => toWireColors(palette), [palette]);
-      const animationConfig = useMemo(() => toWireAnimation(animation), [animation]);
+      // Wire-format conversions — React Compiler memoizes these automatically.
+      const hierarchicalConfig = toWireColors(hierarchical);
+      const paletteConfig = toWireColors(palette);
+      const animationConfig = toWireAnimation(animation);
 
       // Accessibility: decorative by default, informative when labelled.
       const hasLabel = !!accessibilityLabel || accessibilityAutoLabel === true;
       const resolvedLabel =
         accessibilityLabel ?? (accessibilityAutoLabel ? deriveAccessibilityLabel(name) : undefined);
 
-      const sizeStyle = useMemo(
-        () => ({ width: effectiveSize, height: effectiveSize }),
-        [effectiveSize]
-      );
+      const sizeStyle = { width: effectiveSize, height: effectiveSize };
 
       return (
         <HostView
