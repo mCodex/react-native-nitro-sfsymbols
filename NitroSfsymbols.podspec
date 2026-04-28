@@ -11,9 +11,9 @@ Pod::Spec.new do |s|
   s.authors      = package["author"]
 
   s.platforms    = { 
-    :ios => "13.0",
-    :macos => "11.0",
-    :tvos => "13.0",
+    :ios => "16.0",
+    :macos => "13.0",
+    :tvos => "16.0",
     :visionos => "1.0"
   }
   s.source       = { :git => "https://github.com/mCodex/react-native-nitro-sfsymbols.git", :tag => "#{s.version}" }
