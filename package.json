@@ -1,6 +1,6 @@
 {
   "name": "react-native-nitro-sfsymbols",
-  "version": "2.0.0",
+  "version": "1.2.0",
   "description": "Render Apple SF Symbols natively in React Native via Nitro Modules. Type-safe, accessible, tree-shakable.",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
