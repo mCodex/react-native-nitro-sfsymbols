@@ -74,7 +74,7 @@ jobs:
         run: yarn nitrogen
 
       - name: Cache turborepo for Android
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ env.TURBO_CACHE_DIR }}
           key: ${{ runner.os }}-turborepo-android-${{ hashFiles('yarn.lock') }}
@@ -103,7 +103,7 @@ jobs:
 
       - name: Cache Gradle
         if: env.turbo_cache_hit != 1
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             ~/.gradle/wrapper
@@ -138,7 +138,7 @@ jobs:
         run: yarn nitrogen
 
       - name: Cache turborepo for iOS
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ env.TURBO_CACHE_DIR }}
           key: ${{ runner.os }}-turborepo-ios-${{ hashFiles('yarn.lock') }}
