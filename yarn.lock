@@ -3938,11 +3938,11 @@ __metadata:
   linkType: hard
 
 "@types/react@npm:^19.2.14":
-  version: 19.2.14
-  resolution: "@types/react@npm:19.2.14"
+  version: 19.3.0
+  resolution: "@types/react@npm:19.3.0"
   dependencies:
     csstype: ^3.2.2
-  checksum: ddd330292abf2dc2cfa65188e1c5f67cc6e90f8d8ffb088f753a38db9d123f942c23d324a6b7e8027ff04f22b395492150f54b9b520b6cbec1e8841e669f2c19
+  checksum: 1cc51d4b76e5855da231e8b5afbde76db000eb3fffa5a8087a93eef1c168e86f90d10b7dae08dabf7a6ac327a254604406e6ede45c952d39d24dd0da6f856790
   languageName: node
   linkType: hard
 
@@ -9594,7 +9594,7 @@ __metadata:
     "@react-native/typescript-config": 0.85.2
     "@types/react": ^19.2.14
     babel-plugin-react-compiler: ^1.0.0
-    react: 19.2.3
+    react: 19.3.1
     react-native: 0.85.2
     react-native-builder-bob: ^0.41.0
     react-native-monorepo-config: ^0.3.3
@@ -9618,7 +9618,7 @@ __metadata:
     del-cli: ^7.0.0
     jest: ^30.3.0
     nitrogen: ^0.35.5
-    react: 19.2.3
+    react: 19.3.1
     react-native: 0.85.2
     react-native-builder-bob: ^0.41.0
     react-native-nitro-modules: ^0.35.5
@@ -9691,10 +9691,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:19.2.3":
-  version: 19.2.3
-  resolution: "react@npm:19.2.3"
-  checksum: 506e369ae13cb46b7f303c0201aadf856642f482cdf5b1c3730c3a6d1762fd5a3ae1dd31196a4686bfbbe56456dcd0c48a4656c75cbcb45620e3028c54789ae9
+"react@npm:19.3.1":
+  version: 19.3.1
+  resolution: "react@npm:19.3.1"
+  checksum: 08dc4ff4bf67184da3bc91ec89a03e6526479400270f7bbfd79b4ef36245a341a0861d0ce5e31443b6b9d17dd1006d95555e5d1ebf0c53a5f529947dc3c74dfb
   languageName: node
   linkType: hard
 
