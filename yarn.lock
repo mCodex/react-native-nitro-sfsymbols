@@ -8753,6 +8753,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nitro-core@npm:0.37.2":
+  version: 0.37.2
+  resolution: "nitro-core@npm:0.37.2"
+  checksum: f0a065396a79ce680215afa8bcc8108c042b7d229aa307bf9f8380c7f67e82101dde1f409a44063b6dfcc32f7ba61c21e8179f957836a956a7a2b6115eef3c1f
+  languageName: node
+  linkType: hard
+
 "nitrogen@npm:^0.35.5":
   version: 0.35.5
   resolution: "nitrogen@npm:0.35.5"
@@ -9578,6 +9585,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-nitro-modules@npm:^0.37.2":
+  version: 0.37.2
+  resolution: "react-native-nitro-modules@npm:0.37.2"
+  dependencies:
+    nitro-core: 0.37.2
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 094a4d87c0b57c7046c5f602e0be49d11d4d0f714e4151a45e0a7fe4dc6c2cd86d9ae14b4be46458cf528efa5b91d0624bdd5271cd2c494c57fa68c0a1e7217f
+  languageName: node
+  linkType: hard
+
 "react-native-nitro-sfsymbols-example@workspace:example":
   version: 0.0.0-use.local
   resolution: "react-native-nitro-sfsymbols-example@workspace:example"
@@ -9598,7 +9617,7 @@ __metadata:
     react-native: 0.85.2
     react-native-builder-bob: ^0.41.0
     react-native-monorepo-config: ^0.3.3
-    react-native-nitro-modules: ^0.35.5
+    react-native-nitro-modules: ^0.37.2
   languageName: unknown
   linkType: soft
 
@@ -9621,7 +9640,7 @@ __metadata:
     react: 19.2.3
     react-native: 0.85.2
     react-native-builder-bob: ^0.41.0
-    react-native-nitro-modules: ^0.35.5
+    react-native-nitro-modules: ^0.37.2
     release-it: ^20.0.1
     ts-jest: ^29.4.9
     turbo: ^2.9.6
